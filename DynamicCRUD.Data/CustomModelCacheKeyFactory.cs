@@ -6,6 +6,6 @@ namespace DynamicCRUD.Data
     {
 
         public object Create(DbContext context, bool designTime)
-           => new CustomModelCacheKey(context);
+           => (new CustomModelCacheKey(context), designTime);
     }
 }

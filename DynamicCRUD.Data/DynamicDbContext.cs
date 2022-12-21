@@ -60,7 +60,10 @@ namespace DynamicCRUD.Data
                 if (selects == "*")
                     response = metadataQuerySet.ToDynamicList();
                 else
+                {
+
                     response = metadataQuerySet.Select($"new ({selects})").ToDynamicList();
+                }
             }
 
             if (requestObject.SelectType == SelectType.Single)

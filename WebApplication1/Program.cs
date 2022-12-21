@@ -15,7 +15,8 @@ namespace WebApplication1
             // Add services to the container.
             builder.Services.AddDbContext<DynamicDbContext>((options) =>
             {
-                options.UseSqlServer("Data Source=.; Initial Catalog=BookShopDb;Integrated Security=true; Trust Server Certificate=True");
+                //options.UseSqlServer("Data Source=.; Initial Catalog=BookShopDb;Integrated Security=true; Trust Server Certificate=True");
+                options.UseNpgsql("server=localhost;user id=postgres;password=1234;database=BookShopApi;");
                 options.ReplaceService<IModelCacheKeyFactory, CustomModelCacheKeyFactory>();
             });
             builder.Services.AddSingleton<MetadataHolder>();

@@ -23,9 +23,10 @@ namespace WebApplication1.Controllers
                 TableName = "Book",
                 SelectType = SelectType.List,
                 SelectProperties = new List<string>()
-                { "Id", "Title", "Category.Title"}
+                { "Id", "Title", "Category.Title as CatTitle"}
 
             };
+            context.Database.EnsureCreated();
             var data = context.GetData(request);
 
             return data;
