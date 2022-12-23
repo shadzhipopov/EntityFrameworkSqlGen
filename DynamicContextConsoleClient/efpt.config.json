@@ -1,0 +1,137 @@
+﻿{
+   "CodeGenerationMode": 2,
+   "ContextClassName": "BookShopApiContext",
+   "ContextNamespace": null,
+   "DefaultDacpacSchema": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": true,
+   "ModelNamespace": null,
+   "OutputContextPath": null,
+   "OutputPath": "Models",
+   "PreserveCasingWithRegex": true,
+   "ProjectRootNamespace": "DynamicContextConsoleClient",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 0,
+   "Tables": [
+      {
+         "Name": "fdba.BusinessModule",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.BusinessObject",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.BusinessObjectExpression",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.BusinessObjectGroup",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.BusinessObjectRelation",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.BusinessProperty",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.BusinessPropertyType",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.Container",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.ContainerRole",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.DatabaseDataType",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.DatabaseInfo",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.EnumerationType",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.EnumerationValue",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.ExpressionNode",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.ForeignKey",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.ImportPropertyInfo",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.MappingProperties",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.MetadataItemPathRelation",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.Page",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.Permission",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.Role",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.RoleUser",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.User",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.UsersGroup",
+         "ObjectType": 0
+      },
+      {
+         "Name": "fdba.UserUsersGroup",
+         "ObjectType": 0
+      }
+   ],
+   "UiHint": "Fdba",
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": false,
+   "UseDbContextSplitting": false,
+   "UseFluentApiOnly": true,
+   "UseHandleBars": false,
+   "UseHierarchyId": false,
+   "UseInflector": true,
+   "UseLegacyPluralizer": false,
+   "UseManyToManyEntity": false,
+   "UseNoConstructor": false,
+   "UseNoDefaultConstructor": false,
+   "UseNoNavigations": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UseSchemaFolders": false,
+   "UseSpatial": false,
+   "UseT4": false
+}

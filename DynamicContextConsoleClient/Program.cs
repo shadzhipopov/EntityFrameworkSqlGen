@@ -1,89 +1,76 @@
-﻿using DynamicCRUD.Data;
+﻿
+using DynamicContextConsoleClient.Models;
+using DynamicCRUD.Data;
 using DynamicCRUD.Metadata;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Options;
 using System.Linq.Dynamic.Core;
+using System.Linq.Expressions;
+using System.Reflection.Emit;
 
 namespace DynamicContextConsoleClient
 {
     internal class Program
     {
+        //we must have the result types in advance
+        //recursive CTEs are still not possible with LINQ
+        //https://michaelceber.medium.com/implementing-a-recursive-projection-query-in-c-and-entity-framework-core-240945122be6
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
-            DbContextOptionsBuilder options = new DbContextOptionsBuilder();
-            options.UseSqlServer("Data Source=BookShopDb; Initial Catalog=MetaEntities;Integrated Security=true");
+            var options = new DbContextOptionsBuilder<BookShopApiContext>();
+            options.UseNpgsql("server=localhost;user id=postgres;password=1234;database=FdbaDb");
             options.ReplaceService<IModelCacheKeyFactory, CustomModelCacheKeyFactory>();
-            DynamicDbContext context = new DynamicDbContext(options.Options);
-            GetCodelessEntity(new RequestObject() 
+            var db = new BookShopApiContext(options.Options);
+
+            var query = from bo in db.BusinessObjects
+                        select new
+                        {
+                            bo.Id,
+                            bo.DisplayName,
+                            Properties = bo.BusinessProperties.Count(),
+                            LastProp = (from p in db.BusinessProperties
+                                        where p.BusinessObjectId == bo.Id
+                                        orderby p.OrderIndex
+                                        select p.DisplayName
+                                             ).FirstOrDefault()
+                        };
+
+
+
+            // Expression.Call(db.BusinessObjects.GetType(), "Select", )
+            //Expression.Lambda()
+            var ex = query.Expression;
+            var sql = query.ToQueryString();
+            var data = query.ToList();
+            var resultType = DynamicClassFactory.CreateType(new List<DynamicProperty>()
             {
-                TableName = "Book",
-                SelectType = SelectType.List,
-                SelectProperties = new List<string>()
-                { "Id", "Title"}
+                new DynamicProperty("Id", typeof(Guid)),
+                new DynamicProperty("DisplayName", typeof(string)),
+                    new DynamicProperty("Module", typeof(string)),
+                    new DynamicProperty("Properties", typeof(int)),
+                    new DynamicProperty("LastProperty", typeof(string))
+            });
 
-            }, context);
-
-
-        }
-
-        public class RequestObject
-        {
-            public string TableName { get; set; }
-            public List<string> SelectProperties { get; set; }
-            public SelectType SelectType { get; set; }
-        }
-
-        public enum SelectType
-        {
-            Single,
-            List
-        }
-
-        public static async void GetCodelessEntity(RequestObject requestObject, DynamicDbContext _dynamicDbContext)
-        {
-            var metadataEntityName = requestObject.TableName;
-            var metadata = new MetadataEntity();  //Find and get your type from json 
-            
-            object response = null;
-            var metadataQuerySet = (IQueryable<DynamicEntity>)_dynamicDbContext.GetType().GetMethod("Set").MakeGenericMethod(metadata.EntityType).Invoke(_dynamicDbContext, null);
-// var filters = requestObject["Filters"].ToList();
-
-            string selects = "*";
-
-            if (requestObject.SelectProperties != null)
-            {
-                selects = string.Join(',', requestObject.SelectProperties.ToList());
-            }
-
-            //var i = 0;
-            //foreach (var filter in filters)
+            Console.WriteLine("Hello, World!");
+            //DbContextOptionsBuilder options = new DbContextOptionsBuilder();
+            //options.UseSqlServer("Data Source=BookShopDb; Initial Catalog=MetaEntities;Integrated Security=true");
+            //options.ReplaceService<IModelCacheKeyFactory, CustomModelCacheKeyFactory>();
+            //DynamicDbContext context = new DynamicDbContext(options.Options);
+            //var data = context.GetData(new RequestObject() 
             //{
-            //    var filterValue = requestObject["FilterValues"].ElementAt(i).ToString();
-            //    i++;
-            //    metadataQuerySet = metadataQuerySet.Where(filter.ToString(), filterValue);
-            //}
+            //    TableName = "Book",
+            //    SelectType = SelectType.List,
+            //    SelectProperties = new List<string>()
+            //    { "Id", "Title"}
 
-            if (requestObject.SelectType == SelectType.List)
-            {
-                if (selects == "*")
-                    response = await metadataQuerySet.ToDynamicListAsync();
-                else
-                    response = await metadataQuerySet.Select($"new ({selects})").ToDynamicListAsync();
-            }
-
-            if (requestObject.SelectType == SelectType.Single)
-                if (selects == "*")
-                {
-                    response = await metadataQuerySet.FirstOrDefaultAsync();
-                }
-                else
-                {
-                    response = await metadataQuerySet.Select($"new ({selects})").FirstOrDefault();
-                }
+            //});
 
 
+        }
+
+        static void CreateSelectExpression()
+        {
         }
     }
 }
