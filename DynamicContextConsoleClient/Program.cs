@@ -19,7 +19,8 @@ namespace DynamicContextConsoleClient
         static void Main(string[] args)
         {
             var options = new DbContextOptionsBuilder<BookShopApiContext>();
-            options.UseNpgsql("server=localhost;user id=postgres;password=1234;database=FdbaDb");
+            //options.UseNpgsql("server=localhost;user id=postgres;password=1234;database=FdbaDb");
+            options.UseSqlServer("server=.;database=FdbaDb;integrated security=True;Trust Server Certificate=True;");
             options.ReplaceService<IModelCacheKeyFactory, CustomModelCacheKeyFactory>();
             var db = new BookShopApiContext(options.Options);
 
@@ -51,6 +52,18 @@ namespace DynamicContextConsoleClient
                     new DynamicProperty("Properties", typeof(int)),
                     new DynamicProperty("LastProperty", typeof(string))
             });
+        //https://learn.microsoft.com/en-us/dotnet/api/system.linq.expressions.expression.memberinit?view=net-7.0
+        //https://stackoverflow.com/questions/20424603/build-dynamic-select-using-expression-trees
+
+            //var testExpr= Expression.MemberInit(
+            //    db.BusinessObjects,
+            //    new List<MemberBinding>() {
+            //        Expression.Bind(resultType.GetProperty("Id"), Expression.Constant(Guid.NewGuid())),
+                    
+            //    }
+            //);
+
+            //var test = Expression.Lambda<Func<object>>(testExpr).Compile()();
 
             Console.WriteLine("Hello, World!");
             //DbContextOptionsBuilder options = new DbContextOptionsBuilder();
