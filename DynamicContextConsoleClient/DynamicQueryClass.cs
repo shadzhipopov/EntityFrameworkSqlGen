@@ -4,10 +4,12 @@ using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,35 +33,45 @@ namespace DynamicContextConsoleClient
         //var q2 = db.BusinessObjects.Select(bo =>
         //    new Result
         //    {
+        //        Id = bo.Id,
+        //        DisplayName = bo.DisplayName,
+        //        Module = bo.BusinessModule.DisplayName,
         //        Properties = bo.BusinessProperties.Count(),
         //        LastProperty = db.BusinessProperties.Where(p => p.BusinessObjectId == c.Id).OrderBy(c => c.OrderIndex).Select(c => c.DisplayName).FirstOrDefault()
         //    });
 
         public void CreateQuery(BookShopApiContext db)
         {
-
+            Console.WriteLine("Times in miliseconds:");
+            var timer = Stopwatch.StartNew();
             var dynset = (IQueryable<BusinessObject>)db.GetType()
-         .GetMethod("Set", 1, Type.EmptyTypes)
-         .MakeGenericMethod(typeof(BusinessObject)).Invoke(db, null);
+             .GetMethod("Set", 1, Type.EmptyTypes)
+             .MakeGenericMethod(typeof(BusinessObject)).Invoke(db, null);
 
-            //var metadataQuerySet = db.BusinessObjects.AsQueryable();
 
             //https://learn.microsoft.com/en-us/dotnet/api/system.linq.expressions.expression.memberinit?view=net-7.0
             //https://stackoverflow.com/questions/20424603/build-dynamic-select-using-expression-trees
             var resultType = CreateResultType();
+
+            var resultTypeCreationTime = timer.ElapsedMilliseconds;
+            Console.WriteLine("Result type creation: " + resultTypeCreationTime);
+            timer.Restart();
+
             ParameterExpression parameter = Expression.Parameter(typeof(BusinessObject), "bo");
             var enumerableCountMethod = typeof(Enumerable).GetMethods()
-.First(method => method.Name == "Count" && method.GetParameters().Length == 1)
-.MakeGenericMethod(typeof(BusinessProperty));
-            var count2 = Expression.Call(enumerableCountMethod, Expression.Property(parameter, nameof(BusinessObject.BusinessProperties)));
+                .First(method => method.Name == "Count" && method.GetParameters().Length == 1)
+                .MakeGenericMethod(typeof(BusinessProperty));
+
+            var enumerableCount = Expression.Call(enumerableCountMethod, Expression.Property(parameter, nameof(BusinessObject.BusinessProperties)));
 
             var selectExpressionBody = Expression.MemberInit(
                 Expression.New(resultType),
-                new List<MemberBinding>() {
+                new List<MemberBinding>() 
+                {
                     Expression.Bind(resultType.GetProperty("Id"), GetPropertyPathExpression(parameter, nameof(BusinessObject.Id))),
                     Expression.Bind(resultType.GetProperty("DisplayName"), GetPropertyPathExpression(parameter, nameof(BusinessObject.DisplayName))),
                     Expression.Bind(resultType.GetProperty("Module"), GetPropertyPathExpression(parameter, "BusinessModule.DisplayName")),
-                    Expression.Bind(resultType.GetProperty("Properties"), count2)
+                    Expression.Bind(resultType.GetProperty("Properties"), enumerableCount)
                 }
             );
 
@@ -71,9 +83,23 @@ namespace DynamicContextConsoleClient
                 selector.Body.Type
             }, dynset.Expression, Expression.Quote(selector));
 
-            var query = dynset.Provider.CreateQuery(expression);
-            var data = query.ToDynamicList();
+            var selectExpCreationTime = timer.ElapsedMilliseconds;
+            Console.WriteLine("Select expression creation: " + selectExpCreationTime);
+            timer.Restart();
 
+            var query = dynset.Provider.CreateQuery(expression);
+            var queryCreationTime = timer.ElapsedMilliseconds;
+
+            Console.WriteLine("Query creation: " + queryCreationTime);
+            timer.Restart();
+
+            var data = query.ToDynamicListAsync();
+            var queryExecutionTime = timer.ElapsedMilliseconds;
+            Console.WriteLine("Query execution: " + queryExecutionTime);
+
+            var data2 = query.ToDynamicListAsync();
+            Console.WriteLine("Second time query (same) execution: " + queryExecutionTime);
+            Console.ReadLine();
         }
 
         public Expression GetPropertyPathExpression(Expression param, string propertyName)
@@ -83,86 +109,24 @@ namespace DynamicContextConsoleClient
                 return Expression.Property(param, propertyName);
             }
             var index = propertyName.IndexOf(".");
+            //based on navigation property data - call .SelectMany for to many properties and keep that somewhere
             var subParam = Expression.Property(param, propertyName.Substring(0, index));
             return GetPropertyPathExpression(subParam, propertyName.Substring(index + 1));
         }
 
-        private void CQ()
-        {
-            var context = new BookShopApiContext();
-
-            var businessModules = context.Set<BusinessModule>();
-            var businessProperties = context.Set<BusinessProperty>();
-
-            var dataview = businessModules.AsQueryable();
-
-            var dynamicFields = new Dictionary<string, Type>();
-            dynamicFields.Add("FirstName", typeof(string));
-            dynamicFields.Add("LastName", typeof(string));
-            dynamicFields.Add("LastTransaction", typeof(DateTime?));
-
-            Type dynamicType = CreateResultType();
-
-            ParameterExpression sourceItem = Expression.Parameter(dataview.ElementType, "x");
-
-            // Is this right? if if so how do I bind it to the dynamic field????
-            //Expression<Func<Person, DateTime>> lastTransactionSelect = a => transactions.Where(t => t.AuthorizedPersonId == a.Id && t.TransactionDateTime.HasValue).Max(t => t.TransactionDateTime.Value);
-
-            var bindings = new List<MemberBinding>();
-            bindings.Add(Expression.Bind(dynamicType.GetField("FirstName"), Expression.Property(sourceItem, dataview.ElementType.GetProperty("FirstName"))));
-            bindings.Add(Expression.Bind(dynamicType.GetField("LastName"), Expression.Property(sourceItem, dataview.ElementType.GetProperty("LastName"))));
-            // bindings.Add(Expression.Bind(dynamicType.GetField("LastTransaction"), ??? ));
-
-            Expression selector = Expression.Lambda(Expression.MemberInit(Expression.New(dynamicType.GetConstructor(Type.EmptyTypes)), bindings), sourceItem);
-
-            var query = dataview.Provider.CreateQuery(
-                Expression.Call(
-                    typeof(Queryable),
-                    "Select",
-                    new Type[] { dataview.ElementType, dynamicType },
-                Expression.Constant(dataview), selector)).ToDynamicList();
-
-            // Can't bind directly to the query since it's a DBQuery object
-            //gReport.DataSource = ???;
-
-            //gReport.DataBind();
-        }
-
-        //        private void somemethod()
-        //        {
-        //            ParameterExpression transactionParameter = Expression.Parameter(typeof(FinancialTransaction), "t");
-        //            MemberExpression authorizedPersonIdProperty = Expression.Property(transactionParameter, "AuthorizedPersonId");
-        //            MemberExpression transactionDateTime = Expression.Property(transactionParameter, "TransactionDateTime");
-
-        //            MethodInfo whereMethod = GetWhereMethod();
-        //            MethodInfo maxMethod = GetMaxMethod();
-
-        //            var personIdCompare = new Expression[] {
-        //    Expression.Constant(transactions),
-        //    Expression.Lambda<Func<FinancialTransaction, bool>>( Expression.Equal(authorizedPersonIdProperty, Expression.Convert(idProperty, typeof(int?))), new ParameterExpression[] { transactionParameter } )
-        //};
-        //            var transactionDate = Expression.Lambda<Func<FinancialTransaction, DateTime?>>(transactionDateTime, new ParameterExpression[] { transactionParameter });
-        //            var lastTransactionDate = Expression.Call(null, maxMethod, new Expression[] { Expression.Call(null, whereMethod, personIdCompare), transactionDate });
-
-
-        //            bindings.Add(Expression.Bind(dynamicType.GetField("LastTransaction"), lastTransactionDate));
-
-
-
-        //        }
-
-        //private MethodInfo GetWhereMethod()
+        //public void CreateType()
         //{
-        //    Func<FinancialTransaction, bool> fake = element => default(bool);
-        //    Expression<Func<IEnumerable<FinancialTransaction>, IEnumerable<FinancialTransaction>>> lamda = list => list.Where(fake);
-        //    return (lamda.Body as MethodCallExpression).Method;
-        //}
+        //    // Add a listener for the type resolve events.
+        //    AppDomain currentDomain = Thread.GetDomain();
+        //    AssemblyBuilder asmBuild = this.GetType().Assembly;
+        //    ModuleBuilder modBuild = asmBuild.DefineDynamicModule("ModuleOne", "NestedEnum.dll");
+        //    TypeBuilder tb = new TypeBuilder(); 
+                
+        //        modBuild.DefineType("Result", TypeAttributes.Public);
+            
+        //    tb.DefineField("Field2", eb, FieldAttributes.Public);
 
-        //private MethodInfo GetMaxMethod()
-        //{
-        //    Func<FinancialTransaction, DateTime?> fake = element => default(DateTime?);
-        //    Expression<Func<IEnumerable<FinancialTransaction>, DateTime?>> lamda = list => list.Max(fake);
-        //    return (lamda.Body as MethodCallExpression).Method;
+           
         //}
     }
 }
