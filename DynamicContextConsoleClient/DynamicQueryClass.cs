@@ -1,6 +1,7 @@
 ﻿using DynamicContextConsoleClient.Models;
 using DynamicCRUD.Metadata;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -61,7 +62,7 @@ namespace DynamicContextConsoleClient
             var enumerableCountMethod = typeof(Enumerable).GetMethods()
                 .First(method => method.Name == "Count" && method.GetParameters().Length == 1)
                 .MakeGenericMethod(typeof(BusinessProperty));
-
+            var lastPropExp = getnestedexp(db);
             var enumerableCount = Expression.Call(enumerableCountMethod, Expression.Property(parameter, nameof(BusinessObject.BusinessProperties)));
 
             var selectExpressionBody = Expression.MemberInit(
@@ -71,7 +72,8 @@ namespace DynamicContextConsoleClient
                     Expression.Bind(resultType.GetProperty("Id"), GetPropertyPathExpression(parameter, nameof(BusinessObject.Id))),
                     Expression.Bind(resultType.GetProperty("DisplayName"), GetPropertyPathExpression(parameter, nameof(BusinessObject.DisplayName))),
                     Expression.Bind(resultType.GetProperty("Module"), GetPropertyPathExpression(parameter, "BusinessModule.DisplayName")),
-                    Expression.Bind(resultType.GetProperty("Properties"), enumerableCount)
+                    Expression.Bind(resultType.GetProperty("Properties"), enumerableCount),
+                    Expression.Bind(resultType.GetProperty("LastProperty"), lastPropExp)
                 }
             );
 
@@ -93,11 +95,11 @@ namespace DynamicContextConsoleClient
             Console.WriteLine("Query creation: " + queryCreationTime);
             timer.Restart();
 
-            var data = query.ToDynamicListAsync();
+            var data = query.ToDynamicList();
             var queryExecutionTime = timer.ElapsedMilliseconds;
             Console.WriteLine("Query execution: " + queryExecutionTime);
 
-            var data2 = query.ToDynamicListAsync();
+            var data2 = query.ToDynamicList();
             Console.WriteLine("Second time query (same) execution: " + queryExecutionTime);
             Console.ReadLine();
         }
@@ -114,19 +116,64 @@ namespace DynamicContextConsoleClient
             return GetPropertyPathExpression(subParam, propertyName.Substring(index + 1));
         }
 
-        //public void CreateType()
-        //{
-        //    // Add a listener for the type resolve events.
-        //    AppDomain currentDomain = Thread.GetDomain();
-        //    AssemblyBuilder asmBuild = this.GetType().Assembly;
-        //    ModuleBuilder modBuild = asmBuild.DefineDynamicModule("ModuleOne", "NestedEnum.dll");
-        //    TypeBuilder tb = new TypeBuilder(); 
-                
-        //        modBuild.DefineType("Result", TypeAttributes.Public);
-            
-        //    tb.DefineField("Field2", eb, FieldAttributes.Public);
+        private Expression getnestedexp(BookShopApiContext db)
+        {
+            var dynset = (IQueryable<BusinessProperty>)db.GetType()
+            .GetMethod("Set", 1, Type.EmptyTypes)
+            .MakeGenericMethod(typeof(BusinessProperty)).Invoke(db, null);
 
-           
-        //}
+            var q = dynset
+                //.Where()
+                .OrderBy("OrderIndex")
+                .Select(c => c.DisplayName);
+
+            var exp = q.Expression;
+
+            var selectParameterExpression = Expression.Parameter(q.Expression.Type.GetGenericArguments().Single(), "s");
+
+            var eltype = GetElementType(q);
+            var enumerableCountMethod = typeof(Queryable).GetMethods()
+                .First(method => method.Name == "FirstOrDefault" && method.GetParameters().Length == 1)
+                .MakeGenericMethod(typeof(string));
+
+            var selectFirstOrDefaultMethodExpression = Expression.Call(enumerableCountMethod, exp) ;
+            var selectLambda = Expression.Lambda(selectFirstOrDefaultMethodExpression, selectParameterExpression);
+
+            return selectFirstOrDefaultMethodExpression;
+
+
+        }
+
+        // Walk until we get to the first non object element type
+        private static Type GetElementType(IQueryable source)
+        {
+            Expression expr = source.Expression;
+            Type elementType = source.ElementType;
+            while (expr.NodeType == ExpressionType.Call &&
+                   elementType == typeof(object))
+            {
+                var call = (MethodCallExpression)expr;
+                expr = call.Arguments.First();
+                elementType = expr.Type.GetGenericArguments().First();
+            }
+
+            return elementType;
+        }
     }
+
+    //public void CreateType()
+    //{
+    //    // Add a listener for the type resolve events.
+    //    AppDomain currentDomain = Thread.GetDomain();
+    //    AssemblyBuilder asmBuild = this.GetType().Assembly;
+    //    ModuleBuilder modBuild = asmBuild.DefineDynamicModule("ModuleOne", "NestedEnum.dll");
+    //    TypeBuilder tb = new TypeBuilder(); 
+
+    //        modBuild.DefineType("Result", TypeAttributes.Public);
+
+    //    tb.DefineField("Field2", eb, FieldAttributes.Public);
+
+
+    //}
 }
+

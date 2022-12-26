@@ -28,8 +28,8 @@ namespace DynamicContextConsoleClient
         static void Main(string[] args)
         {
             var options = new DbContextOptionsBuilder<BookShopApiContext>();
-            //options.UseNpgsql("server=localhost;user id=postgres;password=1234;database=FdbaDb");
-            options.UseSqlServer("server=.;database=FdbaDb;integrated security=True;Trust Server Certificate=True;");
+            options.UseNpgsql("server=localhost;user id=postgres;password=1234;database=FdbaDb");
+            //options.UseSqlServer("server=.;database=FdbaDb;integrated security=True;Trust Server Certificate=True;");
             options.ReplaceService<IModelCacheKeyFactory, CustomModelCacheKeyFactory>();
             var db = new BookShopApiContext(options.Options);
 
