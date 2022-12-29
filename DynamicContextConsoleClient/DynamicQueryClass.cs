@@ -1,5 +1,6 @@
 ﻿using DynamicContextConsoleClient.Models;
 using DynamicCRUD.Metadata;
+using LinqKit;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using System;
@@ -38,7 +39,7 @@ namespace DynamicContextConsoleClient
         //        DisplayName = bo.DisplayName,
         //        Module = bo.BusinessModule.DisplayName,
         //        Properties = bo.BusinessProperties.Count(),
-        //        LastProperty = db.BusinessProperties.Where(p => p.BusinessObjectId == c.Id).OrderBy(c => c.OrderIndex).Select(c => c.DisplayName).FirstOrDefault()
+        //        LastProperty = db.BusinessProperties.Where(p => p.BusinessObjectId == bo.Id).OrderBy(c => c.OrderIndex).Select(c => c.DisplayName).FirstOrDefault()
         //    });
 
         public void CreateQuery(BookShopApiContext db)
@@ -48,7 +49,6 @@ namespace DynamicContextConsoleClient
             var dynset = (IQueryable<BusinessObject>)db.GetType()
              .GetMethod("Set", 1, Type.EmptyTypes)
              .MakeGenericMethod(typeof(BusinessObject)).Invoke(db, null);
-
 
             //https://learn.microsoft.com/en-us/dotnet/api/system.linq.expressions.expression.memberinit?view=net-7.0
             //https://stackoverflow.com/questions/20424603/build-dynamic-select-using-expression-trees
@@ -62,12 +62,12 @@ namespace DynamicContextConsoleClient
             var enumerableCountMethod = typeof(Enumerable).GetMethods()
                 .First(method => method.Name == "Count" && method.GetParameters().Length == 1)
                 .MakeGenericMethod(typeof(BusinessProperty));
-            var lastPropExp = getnestedexp(db);
+            var lastPropExp = getnestedexp(db, parameter);
             var enumerableCount = Expression.Call(enumerableCountMethod, Expression.Property(parameter, nameof(BusinessObject.BusinessProperties)));
 
             var selectExpressionBody = Expression.MemberInit(
                 Expression.New(resultType),
-                new List<MemberBinding>() 
+                new List<MemberBinding>()
                 {
                     Expression.Bind(resultType.GetProperty("Id"), GetPropertyPathExpression(parameter, nameof(BusinessObject.Id))),
                     Expression.Bind(resultType.GetProperty("DisplayName"), GetPropertyPathExpression(parameter, nameof(BusinessObject.DisplayName))),
@@ -116,27 +116,35 @@ namespace DynamicContextConsoleClient
             return GetPropertyPathExpression(subParam, propertyName.Substring(index + 1));
         }
 
-        private Expression getnestedexp(BookShopApiContext db)
+        private Expression getnestedexp(BookShopApiContext db, Expression parentExpressionParam)
         {
             var dynset = (IQueryable<BusinessProperty>)db.GetType()
             .GetMethod("Set", 1, Type.EmptyTypes)
             .MakeGenericMethod(typeof(BusinessProperty)).Invoke(db, null);
 
+            var selectParameterExpression = Expression.Parameter(dynset.Expression.Type.GetGenericArguments().Single(), "p");
+
+            var firstWhereProp = GetPropertyPathExpression(selectParameterExpression, nameof(BusinessProperty.BusinessObjectId));
+            var secondWhereProp = GetPropertyPathExpression(parentExpressionParam, "Id");
+
+            var equalsExp = Expression.Equal(firstWhereProp, secondWhereProp);
+            var lambda = Expression.Lambda(equalsExp, selectParameterExpression);
+            dynset = dynset.Where(lambda);
+
             var q = dynset
-                //.Where()
+                //.Where() 
+                //db.BusinessProperties.Where(p => p.BusinessObjectId == bo.Id)
                 .OrderBy("OrderIndex")
                 .Select(c => c.DisplayName);
 
-            var exp = q.Expression;
-
-            var selectParameterExpression = Expression.Parameter(q.Expression.Type.GetGenericArguments().Single(), "s");
+            var exp = q.Expression;          
 
             var eltype = GetElementType(q);
             var enumerableCountMethod = typeof(Queryable).GetMethods()
                 .First(method => method.Name == "FirstOrDefault" && method.GetParameters().Length == 1)
                 .MakeGenericMethod(typeof(string));
 
-            var selectFirstOrDefaultMethodExpression = Expression.Call(enumerableCountMethod, exp) ;
+            var selectFirstOrDefaultMethodExpression = Expression.Call(enumerableCountMethod, exp);
             var selectLambda = Expression.Lambda(selectFirstOrDefaultMethodExpression, selectParameterExpression);
 
             return selectFirstOrDefaultMethodExpression;
@@ -160,20 +168,5 @@ namespace DynamicContextConsoleClient
             return elementType;
         }
     }
-
-    //public void CreateType()
-    //{
-    //    // Add a listener for the type resolve events.
-    //    AppDomain currentDomain = Thread.GetDomain();
-    //    AssemblyBuilder asmBuild = this.GetType().Assembly;
-    //    ModuleBuilder modBuild = asmBuild.DefineDynamicModule("ModuleOne", "NestedEnum.dll");
-    //    TypeBuilder tb = new TypeBuilder(); 
-
-    //        modBuild.DefineType("Result", TypeAttributes.Public);
-
-    //    tb.DefineField("Field2", eb, FieldAttributes.Public);
-
-
-    //}
 }
 

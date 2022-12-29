@@ -28,8 +28,8 @@ namespace DynamicContextConsoleClient
         static void Main(string[] args)
         {
             var options = new DbContextOptionsBuilder<BookShopApiContext>();
-            options.UseNpgsql("server=localhost;user id=postgres;password=1234;database=FdbaDb");
-            //options.UseSqlServer("server=.;database=FdbaDb;integrated security=True;Trust Server Certificate=True;");
+            //options.UseNpgsql("server=localhost;user id=postgres;password=1234;database=FdbaDb");
+            options.UseSqlServer("server=.;database=FdbaDb;integrated security=True;Trust Server Certificate=True;");
             options.ReplaceService<IModelCacheKeyFactory, CustomModelCacheKeyFactory>();
             var db = new BookShopApiContext(options.Options);
 
@@ -46,14 +46,14 @@ namespace DynamicContextConsoleClient
                                         where p.BusinessObjectId == bo.Id
                                         orderby p.OrderIndex
                                         select p.DisplayName
-                                             ).FirstOrDefault()
+                                        ).FirstOrDefault()
                         };
 
             var q2 = db.BusinessObjects.Select(c =>
             new Result
             {
                 Properties = c.BusinessProperties.Count(),
-                LastProperty = db.BusinessProperties.Where(p => p.BusinessObjectId == c.Id).OrderBy(c=>c.OrderIndex).Select(c=>c.DisplayName).FirstOrDefault()
+                LastProperty = db.BusinessProperties.Where(p => p.BusinessObjectId == c.Id).OrderBy(c => c.OrderIndex).Select(c => c.DisplayName).FirstOrDefault()
             });
 
 
