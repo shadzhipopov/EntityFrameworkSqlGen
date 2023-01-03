@@ -61,7 +61,10 @@ namespace DynamicCRUD.Data
                     response = metadataQuerySet.ToDynamicList();
                 else
                 {
-
+                    var queryable = metadataQuerySet.Select($"new ({selects})");
+                    var expression = queryable.Expression;
+                    var type = queryable.ElementType;
+                    var sql = metadataQuerySet.Select($"new ({selects})").ToQueryString();
                     response = metadataQuerySet.Select($"new ({selects})").ToDynamicList();
                 }
             }

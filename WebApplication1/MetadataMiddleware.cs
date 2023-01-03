@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Threading.Tasks;
+using WebApplication1.Entities;
 
 namespace DynamicCRUD.Api
 {
@@ -19,121 +20,117 @@ namespace DynamicCRUD.Api
         {
             _next = next;
         }
+        public Type MapToClrType(FdbaDataType businessPropertyType)
+        {
+            switch (businessPropertyType)
+            {
+                case FdbaDataType.ShortInteger:
+                    return typeof(Int16);
+                case FdbaDataType.Integer:
+                    return typeof(int);
+                case FdbaDataType.LongInteger:
+                    return typeof(Int64);
+                case FdbaDataType.Double:
+                    return typeof(double);
+                case FdbaDataType.Decimal:
+                    return typeof(decimal);
+                case FdbaDataType.String:
+                case FdbaDataType.EmailAddress:
+                case FdbaDataType.PhoneNumber:                    
+                    return typeof(string);
 
+                //time is converted to timespan and there is problem with this in the datatable 
+                //an exception is thrown when trying to put timespan to date time column
+                //case BusinessPropertyDataType.Time:                    
+                case FdbaDataType.Date:
+                case FdbaDataType.DateTime:
+                case FdbaDataType.DateTimeOffset:
+                    return typeof(DateTime);
+                case FdbaDataType.Guid:
+                    return typeof(Guid);
+                case FdbaDataType.Boolean:
+                    return typeof(bool);
+                case FdbaDataType.Binary:
+                    return typeof(byte[]);
+                default:
+                    return typeof(string);
+            }
+        }
         public async Task Invoke(
             HttpContext context,
             MetadataHolder metadataHolder,
             TContext dbContext)
         {
-            var metadataHolderFromJson = new
+            bool shouldCreateTyes = false;
+            if(metadataHolder.Entities==null || metadataHolder.Entities.Count==0)
             {
-                Version = "1.0",
-                Entities = new List<MetadataEntity>()
-                {new MetadataEntity
+                var metadataContext = context.RequestServices.GetService<FdbaDbContext>();
+                var metadata = metadataContext.BusinessObject.Select(businessObject => new MetadataEntity()
+                {
+                    SchemaName = businessObject.BusinessModule.PhysicalName,
+                    TableName = businessObject.PhysicalName,
+                    Name = businessObject.DisplayName,
+                    Properties = businessObject.BusinessProperty.Select(property => new MetadataEntityProperty
                     {
-                        SchemaName = "dbo",
-                        TableName = "Category",
-                        EntityType= typeof(DynamicEntity),
-                        Name = "Category",
-                        Properties = new List<MetadataEntityProperty>()
-                        {
-                            new MetadataEntityProperty()
-                            {
-                                Name= "Title",
-                                Type = typeof(string).Name,
-                                ColumnName= "Title"
+                        Name = property.DisplayName,
+                        DbType = property.BusinessPropertyType.DataType,
+                        ColumnName = property.PhysicalName
+                    }).ToList()
+                }).ToList();
 
-                            },
-                            new MetadataEntityProperty() {
-                            Name= "Id",
-                                Type = typeof(int).Name,
-                                ColumnName= "Id"},
-
-                             new MetadataEntityProperty()
-                             {
-                             Name= "Books",
-                                IsNavigation = true,
-                                NavigationType = "many",
-                                NavigationTypeType="Book"
-                             }
-                        }
-                    },
-                    new MetadataEntity
-                    {
-                        SchemaName = "dbo",
-                        TableName = "Book",
-                        EntityType= typeof(DynamicEntity),
-                        Name = "Book",
-                        Properties = new List<MetadataEntityProperty>()
-                        {
-                            new MetadataEntityProperty()
-                            {
-                                Name= "Title",
-                                Type = typeof(string).Name,
-                                ColumnName= "Title"
-
-                            },
-                            new MetadataEntityProperty() {
-                            Name= "Id",
-                                Type = "Int",
-                                ColumnName= "Id"},
-
-
-                             new MetadataEntityProperty() {
-                            Name= "CategoryId",
-                                Type = "Int",
-                                ColumnName= "CategoryId"
-                             },
-
-                             new MetadataEntityProperty() {
-                            Name= "Category",
-                            NavigationTypeType = "Category",
-                            IsNavigation = true,
-                            OppositeNavigationName = "Books",
-                            NavigationType= "Single",
-                                ColumnName= "CategoryId"}
-                        }
-                    },
-                    
+                foreach (var item in metadata.SelectMany(c=>c.Properties))
+                {
+                    item.Type = this.MapToClrType((FdbaDataType)item.DbType).Name;
                 }
-            }; ///LOAD your metadata from cache   await _distributedCacheService.GetAsync<MetadataHolder>("MetadataJson");
 
-            if (metadataHolderFromJson == null)
-                throw new NullReferenceException("MetadataJson load failed.");
+                metadataHolder.Entities = metadata;
+                shouldCreateTyes = true;
+            }
 
-            var isNewMetadataJson = false;
-
-            if (string.IsNullOrEmpty(metadataHolder.Version))
-                isNewMetadataJson = true;
-            else if (metadataHolder.Version != metadataHolderFromJson.Version)
-                isNewMetadataJson = true;
-
-            if (isNewMetadataJson)
+            if (shouldCreateTyes)
             {
                 Dictionary<string, TypeBuilder> entityTypeBuilderList = new Dictionary<string, TypeBuilder>();
 
-                metadataHolder.Entities = new List<MetadataEntity>();
 
                 var dynamicClassFactory = new DynamicClassFactory();
-                foreach (var metadataEntity in metadataHolderFromJson.Entities)
+                foreach (var metadataEntity in metadataHolder.Entities)
                 {
                     var metadataProps = new Dictionary<string, Type>();
                     foreach (var metaDataEntityProp in metadataEntity.Properties.Where(p => !p.IsNavigation))
                     {
-                        // TODO YASIN datetime vb eklenebilir.
                         switch (metaDataEntityProp.Type)
                         {
                             case "String":
                                 metadataProps.Add(metaDataEntityProp.Name, typeof(string));
                                 break;
+                            case "Byte[]":
+                                metadataProps.Add(metaDataEntityProp.Name, typeof(byte[]));
+                                break;
+                            case "Decimal":
+                                metadataProps.Add(metaDataEntityProp.Name, typeof(decimal));
+                                break;
+                            case "Double":
+                                metadataProps.Add(metaDataEntityProp.Name, typeof(double));
+                                break;
+                            case "Float":
+                                metadataProps.Add(metaDataEntityProp.Name, typeof(float));
+                                break;
+                            case "Boolean":
+                                metadataProps.Add(metaDataEntityProp.Name, typeof(bool));
+                                break;
                             case "Int":
+                            case "Int16":
+                            case "Int32":
                                 metadataProps.Add(metaDataEntityProp.Name, typeof(int));
                                 break;
                             case "Guid":
                                 metadataProps.Add(metaDataEntityProp.Name, typeof(Guid));
                                 break;
+                            case "DateTime":
+                                metadataProps.Add(metaDataEntityProp.Name, typeof(DateTime));
+                                break;
                             default:
-                                //Implement for Other types
+                                throw new NotImplementedException();
                                 break;
                         }
                     }
@@ -148,10 +145,9 @@ namespace DynamicCRUD.Api
                         metadataEntity.EntityType = Type.GetType(metadataEntity.CustomAssemblyType);
 
 
-                    metadataHolder.Entities.Add(metadataEntity);
                 }
 
-                metadataHolder.Version = metadataHolderFromJson.Version;
+                metadataHolder.Version = metadataHolder.Version;
 
                 foreach (var metadataEntity in metadataHolder.Entities)
                 {

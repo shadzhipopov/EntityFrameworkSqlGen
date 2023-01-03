@@ -9,6 +9,7 @@ namespace DynamicCRUD.Metadata
         public string Name { get; set; }
 
         public string Type { get; set; }
+        public int DbType { get; set; }
 
         public string ColumnName { get; set; }
 

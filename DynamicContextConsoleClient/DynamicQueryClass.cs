@@ -48,9 +48,11 @@ namespace DynamicContextConsoleClient
         {
             Console.WriteLine("Times in miliseconds:");
             var timer = Stopwatch.StartNew();
-            var dynset = (IQueryable<BusinessObject>)db.GetType()
-             .GetMethod("Set", 1, Type.EmptyTypes)
-             .MakeGenericMethod(typeof(BusinessObject)).Invoke(db, null);
+            //var dynset = (IQueryable<BusinessObject>)db.GetType()
+            // .GetMethod("Set", 1, Type.EmptyTypes)
+            // .MakeGenericMethod(typeof(BusinessObject)).Invoke(db, null);
+
+            var dynset = db.BusinessObjects.AsQueryable();
 
             //https://learn.microsoft.com/en-us/dotnet/api/system.linq.expressions.expression.memberinit?view=net-7.0
             //https://stackoverflow.com/questions/20424603/build-dynamic-select-using-expression-trees
@@ -100,9 +102,10 @@ namespace DynamicContextConsoleClient
             var data = query.ToDynamicList();
             var queryExecutionTime = timer.ElapsedMilliseconds;
             Console.WriteLine("Query execution: " + queryExecutionTime);
+            timer.Restart();
 
             var data2 = query.ToDynamicList();
-            Console.WriteLine("Second time query (same) execution: " + queryExecutionTime);
+            Console.WriteLine("Second time query (same) execution: " + timer.ElapsedMilliseconds);
             Console.ReadLine();
         }
 

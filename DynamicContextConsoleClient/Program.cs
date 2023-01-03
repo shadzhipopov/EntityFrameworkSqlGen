@@ -47,7 +47,7 @@ namespace DynamicContextConsoleClient
             var db = new BookShopApiContext(options.Options);
 
             var cc = new DynamicQueryClass();
-            //cc.CreateQuery(db);
+            cc.CreateQuery(db);
 
             var query = from bo in db.BusinessObjects
                         select new
@@ -62,7 +62,7 @@ namespace DynamicContextConsoleClient
                                         ).FirstOrDefault()
                         };
 
-            var filteredProperties = new List<int> { 1, 2, 3 };
+            var filteredProperties = db.BusinessProperties.Where(c => c.OrderIndex > 10).Select(c => c.Id);
 
             var q2 = db.BusinessModules
                 .Select(module =>
@@ -77,7 +77,7 @@ namespace DynamicContextConsoleClient
                 .FirstOrDefault(),
                 
                 AllProperties = db.BusinessProperties
-                .Where(p => p.BusinessObject.BusinessModuleId == module.Id && filteredProperties.Contains(p.OrderIndex))
+                .Where(p => p.BusinessObject.BusinessModuleId == module.Id && filteredProperties.Contains(p.Id))
                 .Select(c=>new BP() { 
                     Id=c.Id,
                     Name=c.DisplayName,
