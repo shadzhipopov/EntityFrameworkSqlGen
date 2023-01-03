@@ -39,7 +39,9 @@ namespace DynamicContextConsoleClient
         //        DisplayName = bo.DisplayName,
         //        Module = bo.BusinessModule.DisplayName,
         //        Properties = bo.BusinessProperties.Count(),
-        //        LastProperty = db.BusinessProperties.Where(p => p.BusinessObjectId == bo.Id).OrderBy(c => c.OrderIndex).Select(c => c.DisplayName).FirstOrDefault()
+        //        LastProperty = db.BusinessProperties
+        //        .Where(p => p.BusinessObjectId == bo.Id).OrderBy(c => c.OrderIndex)
+        //        .Select(c => c.DisplayName).FirstOrDefault()
         //    });
 
         public void CreateQuery(BookShopApiContext db)

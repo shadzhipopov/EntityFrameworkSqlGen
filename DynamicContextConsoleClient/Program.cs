@@ -21,7 +21,6 @@ namespace DynamicContextConsoleClient
 
         //TO DO: consider nested projections
         public List<BP> AllProperties { get; set; }
-
     }
 
     public class BP
@@ -30,6 +29,7 @@ namespace DynamicContextConsoleClient
         public string Name { get; set; }
         public int Type { get; set; }
     }
+
     internal class Program
     {
         //we must have the result types in advance
@@ -41,8 +41,8 @@ namespace DynamicContextConsoleClient
         static void Main(string[] args)
         {
             var options = new DbContextOptionsBuilder<BookShopApiContext>();
-            options.UseNpgsql("server=localhost;user id=postgres;password=1234;database=FdbaDb");
-            //options.UseSqlServer("server=.;database=FdbaDb;integrated security=True;Trust Server Certificate=True;");
+            //options.UseNpgsql("server=localhost;user id=postgres;password=1234;database=FdbaDb");
+            options.UseSqlServer("server=.;database=FdbaDb;integrated security=True;Trust Server Certificate=True;");
             options.ReplaceService<IModelCacheKeyFactory, CustomModelCacheKeyFactory>();
             var db = new BookShopApiContext(options.Options);
 
@@ -62,24 +62,28 @@ namespace DynamicContextConsoleClient
                                         ).FirstOrDefault()
                         };
 
-            var q2 = db.BusinessModules.Select(module =>
+            var filteredProperties = new List<int> { 1, 2, 3 };
+
+            var q2 = db.BusinessModules
+                .Select(module =>
             new Result
             {
                 Id = module.Id,
                 Name  = module.DisplayName,
                 Properties = module.BusinessObjects.SelectMany(bm=>bm.BusinessProperties).Count(),
-                LastProperty = db.BusinessProperties.Where(p => p.BusinessObject.BusinessModuleId == module.Id).OrderBy(c => c.OrderIndex).Select(c => c.DisplayName).FirstOrDefault(),
-                AllProperties = db.BusinessProperties.Where(p => p.BusinessObject.BusinessModuleId == module.Id).Select(c=>new BP() { 
+                LastProperty = db.BusinessProperties
+                .Where(p => p.BusinessObject.BusinessModuleId == module.Id)
+                .OrderBy(c => c.OrderIndex).Select(c => c.DisplayName)
+                .FirstOrDefault(),
+                
+                AllProperties = db.BusinessProperties
+                .Where(p => p.BusinessObject.BusinessModuleId == module.Id && filteredProperties.Contains(p.OrderIndex))
+                .Select(c=>new BP() { 
                     Id=c.Id,
                     Name=c.DisplayName,
                     Type=c.BusinessPropertyType.DataType
-
-
-                }).ToList(),
-
+                }).ToList()
             });
-
-
 
             // Expression.Call(db.BusinessObjects.GetType(), "Select", )
             //Expression.Lambda()
