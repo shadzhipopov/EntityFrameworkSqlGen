@@ -26,7 +26,7 @@ namespace WebApplication1.Controllers
                 
                 SelectType = SelectType.List,
                 SelectProperties = new List<string>()
-                { "FirstName", "Title", "LastName"}
+                { "FirstName", "Title", "LastName", "BusinessEntity.ModifiedDate"}
 
             };
             context.Database.EnsureCreated();
