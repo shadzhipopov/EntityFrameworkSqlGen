@@ -41,7 +41,15 @@ public partial class BusinessObject
 
     public virtual BusinessModule BusinessModule { get; set; }
 
-    public virtual ICollection<BusinessProperty> BusinessProperty { get; } = new List<BusinessProperty>();
+    public virtual ICollection<BusinessObjectExpression> BusinessObjectExpressions { get; } = new List<BusinessObjectExpression>();
+
+    public virtual ICollection<BusinessObjectRelation> BusinessObjectRelationFromObjects { get; } = new List<BusinessObjectRelation>();
+
+    public virtual ICollection<BusinessObjectRelation> BusinessObjectRelationManyToManyObjects { get; } = new List<BusinessObjectRelation>();
+
+    public virtual ICollection<BusinessObjectRelation> BusinessObjectRelationToObjects { get; } = new List<BusinessObjectRelation>();
+
+    public virtual ICollection<BusinessProperty> BusinessProperties { get; } = new List<BusinessProperty>();
 
     public virtual ICollection<BusinessObject> InverseBaseObject { get; } = new List<BusinessObject>();
 

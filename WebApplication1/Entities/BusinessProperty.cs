@@ -41,9 +41,17 @@ public partial class BusinessProperty
 
     public string PhysicalName { get; set; }
 
-    public virtual ICollection<BusinessObject> BusinessObject { get; } = new List<BusinessObject>();
+    public virtual BusinessObject BusinessObject { get; set; }
 
-    public virtual BusinessObject BusinessObjectNavigation { get; set; }
+    public virtual ICollection<BusinessObjectExpression> BusinessObjectExpressions { get; } = new List<BusinessObjectExpression>();
+
+    public virtual ICollection<BusinessObject> BusinessObjects { get; } = new List<BusinessObject>();
 
     public virtual BusinessPropertyType BusinessPropertyType { get; set; }
+
+    public virtual BusinessObjectExpression ComputeExpression { get; set; }
+
+    public virtual ICollection<ForeignKey> ForeignKeyForeignKeyProperties { get; } = new List<ForeignKey>();
+
+    public virtual ICollection<ForeignKey> ForeignKeyPrimaryKeyProperties { get; } = new List<ForeignKey>();
 }

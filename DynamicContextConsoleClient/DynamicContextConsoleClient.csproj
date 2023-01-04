@@ -19,7 +19,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DynamicCRUD.Data\DynamicCRUD.Data.csproj" />
-    <ProjectReference Include="..\DynamicCRUD.Emit\DynamicCRUD.Emit.csproj" />
     <ProjectReference Include="..\DynamicCRUD.Metadata\DynamicCRUD.Metadata.csproj" />
   </ItemGroup>
 

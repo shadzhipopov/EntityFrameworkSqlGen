@@ -3,11 +3,13 @@ using DynamicCRUD.Emit;
 using DynamicCRUD.Metadata;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Threading.Tasks;
+using WebApplication1;
 using WebApplication1.Entities;
 
 namespace DynamicCRUD.Api
@@ -56,6 +58,89 @@ namespace DynamicCRUD.Api
                     return typeof(string);
             }
         }
+        private string PluralizeName(string name)
+        {
+            return PluralizeService.Core.PluralizationProvider.Pluralize(name);
+        }
+
+        private RelationType GetRelationType(BusinessObjectRelation relation)
+        {
+            if(relation.FromEnd == RelationEnd.One || relation.FromEnd == RelationEnd.ZeroOrOne)
+            {
+                if(relation.ToEnd == RelationEnd.One || relation.ToEnd == RelationEnd.ZeroOrOne)
+                {
+                    return RelationType.OneToZeroOrOne;
+                }
+                else
+                {
+                    return RelationType.OneToMany;
+                }
+            }
+            else
+            {
+                if(relation.ToEnd == RelationEnd.Many)
+                {
+                    return RelationType.ManyToMany;
+                }
+                else
+                {
+                    return RelationType.OneToMany;
+                }
+            }
+        }
+
+        private string GetForeignKeyPropertyName(BusinessObjectRelation relation)
+        {
+            return relation.ForeignKeys.SingleOrDefault().ForeignKeyProperty.PhysicalName;
+        }
+
+        private void CreateOneToManyNavigationProperties(BusinessObjectRelation relation, MetadataEntity fromEntity, MetadataEntity toEntity)
+        {
+
+            var fromEntityNavigation = new MetadataNavigationProperty();
+            fromEntityNavigation.RelationType = GetRelationType(relation);
+            fromEntityNavigation.Type = relation.ToEnd;
+            fromEntityNavigation.Name = toEntity.Name;
+            fromEntityNavigation.RelationName = relation.RelationName;
+            fromEntityNavigation.OppositeNavigationName = fromEntity.Name;
+            fromEntityNavigation.OppositeObjectName = toEntity.Name;
+            fromEntityNavigation.ForeignKeyPropertyName = GetForeignKeyPropertyName(relation);
+            fromEntity.NavigationProperties.Add(fromEntityNavigation);
+
+            var toEntityNavigation = new MetadataNavigationProperty();
+            toEntityNavigation.RelationType = GetRelationType(relation);
+            toEntityNavigation.Type = relation.FromEnd;
+            toEntityNavigation.Name = fromEntity.Name;
+            toEntityNavigation.RelationName = relation.RelationName;
+            toEntityNavigation.OppositeNavigationName = toEntity.Name;
+            toEntityNavigation.OppositeObjectName = fromEntity.Name;
+            toEntityNavigation.ForeignKeyPropertyName = GetForeignKeyPropertyName(relation);
+            toEntity.NavigationProperties.Add(toEntityNavigation);
+
+            if (relation.FromEnd == RelationEnd.One ||
+                relation.FromEnd == RelationEnd.ZeroOrOne)
+            {
+
+                toEntityNavigation.Name = PluralizeName(fromEntity.Name);
+            }
+            else
+            {
+
+                fromEntityNavigation.Name = PluralizeName(toEntity.Name);
+            }
+        }
+
+        private bool IsFromPrincipalCondition(BusinessObjectRelation relation)
+        {
+            if (relation.FromEnd == RelationEnd.Many && relation.ToEnd == RelationEnd.Many)
+            {
+                throw new Exception("Many to many relations do not have principal!");
+            }
+            var condition = (relation.FromEnd == RelationEnd.One) ||
+                     (relation.FromEnd == RelationEnd.ZeroOrOne && relation.ToEnd == RelationEnd.Many);
+            return condition;
+        }
+
         public async Task Invoke(
             HttpContext context,
             MetadataHolder metadataHolder,
@@ -65,18 +150,78 @@ namespace DynamicCRUD.Api
             if(metadataHolder.Entities==null || metadataHolder.Entities.Count==0)
             {
                 var metadataContext = context.RequestServices.GetService<FdbaDbContext>();
-                var metadata = metadataContext.BusinessObject.Select(businessObject => new MetadataEntity()
+               
+                var metadata = metadataContext.BusinessObjects.Select(businessObject => new MetadataEntity()
                 {
+                    Id = businessObject.Id,
                     SchemaName = businessObject.BusinessModule.PhysicalName,
                     TableName = businessObject.PhysicalName,
                     Name = businessObject.DisplayName,
-                    Properties = businessObject.BusinessProperty.Select(property => new MetadataEntityProperty
+                    
+                    Properties = businessObject.BusinessProperties.Select(property => new MetadataEntityProperty
                     {
                         Name = property.DisplayName,
                         DbType = property.BusinessPropertyType.DataType,
-                        ColumnName = property.PhysicalName
+                        ColumnName = property.PhysicalName,
+                        IsPrimaryKey 
+                         = property.IsPrimaryKey,
                     }).ToList()
                 }).ToList();
+
+                var businessObjects = metadataContext.BusinessObjects.Include(c=>c.BusinessProperties).ToList();
+                var relations = metadataContext.BusinessObjectRelations
+                    .Include(c => c.ForeignKeys)
+                    .ToList();
+
+                foreach (var relation in relations)
+                {
+                    var relationType = GetRelationType(relation);
+
+                    var fromEntity = metadata.First(c => c.Id == relation.FromObjectId);
+                    var toEntity = metadata.First(c => c.Id == relation.ToObjectId);
+
+                    switch (relationType)
+                    {
+                        case RelationType.ManyToMany:
+                            continue;
+                        case RelationType.OneToZeroOrOne:
+                            var fromEntityNavigation = new MetadataNavigationProperty();
+                            fromEntityNavigation.RelationType = GetRelationType(relation);
+                            fromEntityNavigation.Type = relation.ToEnd;
+                            fromEntityNavigation.Name = toEntity.Name;
+                            fromEntityNavigation.RelationName = relation.RelationName;
+                            fromEntityNavigation.OppositeNavigationName = fromEntity.Name;
+                            fromEntityNavigation.OppositeObjectName = toEntity.Name;
+                            fromEntityNavigation.ForeignKeyPropertyName = GetForeignKeyPropertyName(relation);
+                            fromEntity.NavigationProperties.Add(fromEntityNavigation);
+
+
+
+                            var toEntityNavigation = new MetadataNavigationProperty();
+                            toEntityNavigation.RelationType = GetRelationType(relation);
+                            toEntityNavigation.Type = relation.FromEnd;
+                            toEntityNavigation.Name = fromEntity.Name;
+                            toEntityNavigation.RelationName = relation.RelationName;
+                            toEntityNavigation.OppositeNavigationName = toEntity.Name;
+                            toEntityNavigation.OppositeObjectName = fromEntity.Name;
+                            toEntityNavigation.ForeignKeyPropertyName = GetForeignKeyPropertyName(relation);
+                            toEntity.NavigationProperties.Add(toEntityNavigation);
+
+                            if(IsFromPrincipalCondition(relation))
+                            {
+                                fromEntityNavigation.IsPrincipal = true;
+                            }
+                            else
+                            {
+                                toEntityNavigation.IsPrincipal = false;
+                            }
+
+                            continue;
+                        case RelationType.OneToMany:
+                            CreateOneToManyNavigationProperties(relation,fromEntity,toEntity);
+                            break;
+                    }
+                }
 
                 foreach (var item in metadata.SelectMany(c=>c.Properties))
                 {
@@ -91,12 +236,11 @@ namespace DynamicCRUD.Api
             {
                 Dictionary<string, TypeBuilder> entityTypeBuilderList = new Dictionary<string, TypeBuilder>();
 
-
                 var dynamicClassFactory = new DynamicClassFactory();
                 foreach (var metadataEntity in metadataHolder.Entities)
                 {
                     var metadataProps = new Dictionary<string, Type>();
-                    foreach (var metaDataEntityProp in metadataEntity.Properties.Where(p => !p.IsNavigation))
+                    foreach (var metaDataEntityProp in metadataEntity.Properties)
                     {
                         switch (metaDataEntityProp.Type)
                         {
@@ -131,7 +275,6 @@ namespace DynamicCRUD.Api
                                 break;
                             default:
                                 throw new NotImplementedException();
-                                break;
                         }
                     }
                     if (string.IsNullOrEmpty(metadataEntity.CustomAssemblyType))
@@ -140,11 +283,10 @@ namespace DynamicCRUD.Api
 
                         entityTypeBuilderList.Add(metadataEntity.Name, entityTypeBuilder);
                     }
-
                     else
+                    {
                         metadataEntity.EntityType = Type.GetType(metadataEntity.CustomAssemblyType);
-
-
+                    }
                 }
 
                 metadataHolder.Version = metadataHolder.Version;
@@ -153,23 +295,22 @@ namespace DynamicCRUD.Api
                 {
                     var existEntityTypeBuilder = entityTypeBuilderList.FirstOrDefault(p => p.Key == metadataEntity.Name).Value;
 
-                    foreach (var metaDataEntityProp in metadataEntity.Properties.Where(p => p.IsNavigation))
+                    foreach (var navigationProperty in metadataEntity.NavigationProperties)
                     {
-                        var relatedEntityTypeBuilder = entityTypeBuilderList.FirstOrDefault(p => p.Key == metaDataEntityProp.NavigationTypeType).Value;
+                        var relatedEntityTypeBuilder = entityTypeBuilderList.FirstOrDefault(p => p.Key == navigationProperty.OppositeObjectName).Value;
 
                         var relatedProp = new Dictionary<string, Type>();
 
-                        if (metaDataEntityProp.NavigationType == "Single")
+                        if (navigationProperty.Type == RelationEnd.One ||
+                            navigationProperty.Type == RelationEnd.ZeroOrOne)
                         {
-                            relatedProp.Add(metaDataEntityProp.Name, relatedEntityTypeBuilder);
+                            relatedProp.Add(navigationProperty.Name, relatedEntityTypeBuilder);
                         }
                         else
                         {
                             Type listGenericType = typeof(List<>);
-
                             Type listRelateEntityType = listGenericType.MakeGenericType(relatedEntityTypeBuilder);
-
-                            relatedProp.Add(metaDataEntityProp.Name, listRelateEntityType);
+                            relatedProp.Add(navigationProperty.Name, listRelateEntityType);
                         }
                         new DynamicClassFactory().CreatePropertiesForTypeBuilder(existEntityTypeBuilder, relatedProp, null);
                     }
@@ -178,7 +319,9 @@ namespace DynamicCRUD.Api
             }
 
             foreach (var metaDataEntity in metadataHolder.Entities)
+            {
                 dbContext.AddMetadata(metaDataEntity);
+            }
 
             dbContext.SetContextVersion(metadataHolder.Version);
 

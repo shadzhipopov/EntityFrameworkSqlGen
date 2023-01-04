@@ -13,13 +13,19 @@ public partial class FdbaDbContext : DbContext
     {
     }
 
-    public virtual DbSet<BusinessModule> BusinessModule { get; set; }
+    public virtual DbSet<BusinessModule> BusinessModules { get; set; }
 
-    public virtual DbSet<BusinessObject> BusinessObject { get; set; }
+    public virtual DbSet<BusinessObject> BusinessObjects { get; set; }
 
-    public virtual DbSet<BusinessProperty> BusinessProperty { get; set; }
+    public virtual DbSet<BusinessObjectExpression> BusinessObjectExpressions { get; set; }
 
-    public virtual DbSet<BusinessPropertyType> BusinessPropertyType { get; set; }
+    public virtual DbSet<BusinessObjectRelation> BusinessObjectRelations { get; set; }
+
+    public virtual DbSet<BusinessProperty> BusinessProperties { get; set; }
+
+    public virtual DbSet<BusinessPropertyType> BusinessPropertyTypes { get; set; }
+
+    public virtual DbSet<ForeignKey> ForeignKeys { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -48,9 +54,47 @@ public partial class FdbaDbContext : DbContext
 
             entity.HasOne(d => d.BaseObject).WithMany(p => p.InverseBaseObject).HasForeignKey(d => d.BaseObjectId);
 
-            entity.HasOne(d => d.BusinessModule).WithMany(p => p.BusinessObject).HasForeignKey(d => d.BusinessModuleId);
+            entity.HasOne(d => d.BusinessModule).WithMany(p => p.BusinessObjects).HasForeignKey(d => d.BusinessModuleId);
 
-            entity.HasOne(d => d.NameProperty).WithMany(p => p.BusinessObject).HasForeignKey(d => d.NamePropertyId);
+            entity.HasOne(d => d.NameProperty).WithMany(p => p.BusinessObjects).HasForeignKey(d => d.NamePropertyId);
+        });
+
+        modelBuilder.Entity<BusinessObjectExpression>(entity =>
+        {
+            entity.ToTable("BusinessObjectExpression", "fdba");
+
+            entity.HasIndex(e => e.BusinessObjectId, "IX_BusinessObjectExpression_BusinessObjectId");
+
+            entity.HasIndex(e => e.TargetPropertyId, "IX_BusinessObjectExpression_TargetPropertyId");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+
+            entity.HasOne(d => d.BusinessObject).WithMany(p => p.BusinessObjectExpressions).HasForeignKey(d => d.BusinessObjectId);
+
+            entity.HasOne(d => d.TargetProperty).WithMany(p => p.BusinessObjectExpressions).HasForeignKey(d => d.TargetPropertyId);
+        });
+
+        modelBuilder.Entity<BusinessObjectRelation>(entity =>
+        {
+            entity.ToTable("BusinessObjectRelation", "fdba");
+
+            entity.HasIndex(e => e.FromObjectId, "IX_BusinessObjectRelation_FromObjectId");
+
+            entity.HasIndex(e => e.ManyToManyObjectId, "IX_BusinessObjectRelation_ManyToManyObjectId");
+
+            entity.HasIndex(e => e.ToObjectId, "IX_BusinessObjectRelation_ToObjectId");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+
+            entity.HasOne(d => d.FromObject).WithMany(p => p.BusinessObjectRelationFromObjects)
+                .HasForeignKey(d => d.FromObjectId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.ManyToManyObject).WithMany(p => p.BusinessObjectRelationManyToManyObjects).HasForeignKey(d => d.ManyToManyObjectId);
+
+            entity.HasOne(d => d.ToObject).WithMany(p => p.BusinessObjectRelationToObjects)
+                .HasForeignKey(d => d.ToObjectId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<BusinessProperty>(entity =>
@@ -65,7 +109,9 @@ public partial class FdbaDbContext : DbContext
 
             entity.Property(e => e.Id).ValueGeneratedNever();
 
-            entity.HasOne(d => d.BusinessObjectNavigation).WithMany(p => p.BusinessProperty).HasForeignKey(d => d.BusinessObjectId);
+            entity.HasOne(d => d.BusinessObject).WithMany(p => p.BusinessProperties).HasForeignKey(d => d.BusinessObjectId);
+
+            entity.HasOne(d => d.ComputeExpression).WithMany(p => p.BusinessProperties).HasForeignKey(d => d.ComputeExpressionId);
         });
 
         modelBuilder.Entity<BusinessPropertyType>(entity =>
@@ -76,6 +122,29 @@ public partial class FdbaDbContext : DbContext
 
             entity.HasOne(d => d.IdNavigation).WithOne(p => p.BusinessPropertyType)
                 .HasForeignKey<BusinessPropertyType>(d => d.Id)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<ForeignKey>(entity =>
+        {
+            entity.ToTable("ForeignKey", "fdba");
+
+            entity.HasIndex(e => e.BusinessObjectRelationId, "IX_ForeignKey_BusinessObjectRelationId");
+
+            entity.HasIndex(e => e.ForeignKeyPropertyId, "IX_ForeignKey_ForeignKeyPropertyId");
+
+            entity.HasIndex(e => e.PrimaryKeyPropertyId, "IX_ForeignKey_PrimaryKeyPropertyId");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+
+            entity.HasOne(d => d.BusinessObjectRelation).WithMany(p => p.ForeignKeys).HasForeignKey(d => d.BusinessObjectRelationId);
+
+            entity.HasOne(d => d.ForeignKeyProperty).WithMany(p => p.ForeignKeyForeignKeyProperties)
+                .HasForeignKey(d => d.ForeignKeyPropertyId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.PrimaryKeyProperty).WithMany(p => p.ForeignKeyPrimaryKeyProperties)
+                .HasForeignKey(d => d.PrimaryKeyPropertyId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
         });
 

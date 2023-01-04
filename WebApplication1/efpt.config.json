@@ -23,11 +23,23 @@
          "ObjectType": 0
       },
       {
+         "Name": "[fdba].[BusinessObjectExpression]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[fdba].[BusinessObjectRelation]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[fdba].[BusinessProperty]",
          "ObjectType": 0
       },
       {
          "Name": "[fdba].[BusinessPropertyType]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[fdba].[ForeignKey]",
          "ObjectType": 0
       }
    ],
@@ -39,7 +51,7 @@
    "UseFluentApiOnly": true,
    "UseHandleBars": false,
    "UseHierarchyId": false,
-   "UseInflector": false,
+   "UseInflector": true,
    "UseLegacyPluralizer": false,
    "UseManyToManyEntity": false,
    "UseNoDefaultConstructor": false,

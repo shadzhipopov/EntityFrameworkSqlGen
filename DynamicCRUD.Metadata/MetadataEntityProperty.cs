@@ -13,10 +13,7 @@ namespace DynamicCRUD.Metadata
 
         public string ColumnName { get; set; }
 
-        public bool IsNavigation { get; set; }
+        public bool IsPrimaryKey { get; set; }
 
-        public string NavigationType { get; set; } = "Single";
-        public string OppositeNavigationName { get; set; }
-        public string NavigationTypeType { get; set; }
     }
 }

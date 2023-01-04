@@ -27,7 +27,7 @@ namespace DynamicCRUD.Data
 
         public string GetContextVersion() => _version;
 
-       
+
         public object GetData(RequestObject requestObject)
         {
             var metadataEntityName = requestObject.TableName;
@@ -95,36 +95,47 @@ namespace DynamicCRUD.Data
             {
                 var entityBuilder = modelBuilder.Entity(metadataEntity.EntityType);
 
+                var primaryKey = metadataEntity.Properties.Single(c => c.IsPrimaryKey);
                 entityBuilder.ToTable(metadataEntity.TableName, metadataEntity.SchemaName)
-                    .HasKey("Id");
+                    .HasKey(primaryKey.ColumnName);
 
                 foreach (var metaDataEntityProp in metadataEntity.Properties)
                 {
-                    if (!metaDataEntityProp.IsNavigation)
-                    {
-                        var propBuilder = entityBuilder
-                            .Property(metaDataEntityProp.Name);
+                    var propBuilder = entityBuilder
+                        .Property(metaDataEntityProp.Name);
 
-                        if (!string.IsNullOrEmpty(metaDataEntityProp.ColumnName))
-                        {
-                            propBuilder.HasColumnName(metaDataEntityProp.ColumnName);
-                        }
-                    }
-                    else
+                    if (!string.IsNullOrEmpty(metaDataEntityProp.ColumnName))
                     {
-                        if(metaDataEntityProp.NavigationType == "Single")
-                        {
-                            entityBuilder.HasOne(metaDataEntityProp.Name)
-                                .WithMany(metaDataEntityProp.OppositeNavigationName)
-                                .HasForeignKey(metaDataEntityProp.ColumnName)
-                                .OnDelete(DeleteBehavior.Restrict);
-                        }
+                        propBuilder.HasColumnName(metaDataEntityProp.ColumnName);
                     }
+                }
+                foreach (var navigationProperty in metadataEntity.NavigationProperties)
+                {
+                    if (navigationProperty.Type == RelationEnd.One ||
+                        navigationProperty.Type == RelationEnd.ZeroOrOne)
+                    {
+                        if(navigationProperty.RelationType == RelationType.OneToZeroOrOne)
+                        {
+                            if(navigationProperty.IsPrincipal == false)
+                            {
+                                entityBuilder.HasOne(navigationProperty.Name)
+                          .WithOne(navigationProperty.OppositeNavigationName)
+                          .HasForeignKey(metadataEntity.Name, navigationProperty.ForeignKeyPropertyName);
+                            }
+                          
+                        }
+                        else
+                        {
+                            entityBuilder.HasOne(navigationProperty.Name)
+                            .WithMany(navigationProperty.OppositeNavigationName)
+                            .HasForeignKey(navigationProperty.ForeignKeyPropertyName)
+                            .OnDelete(DeleteBehavior.Restrict);
+                        }
+                    }                    
+
                 }
             }
             base.OnModelCreating(modelBuilder);
         }
-
     }
-
 }

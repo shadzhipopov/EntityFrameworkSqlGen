@@ -17,5 +17,5 @@ public partial class BusinessModule
 
     public string PhysicalName { get; set; }
 
-    public virtual ICollection<BusinessObject> BusinessObject { get; } = new List<BusinessObject>();
+    public virtual ICollection<BusinessObject> BusinessObjects { get; } = new List<BusinessObject>();
 }
