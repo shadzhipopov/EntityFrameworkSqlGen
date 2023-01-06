@@ -1,13 +1,11 @@
 ﻿
 using DynamicContextConsoleClient.Models;
 using DynamicCRUD.Data;
-using DynamicCRUD.Metadata;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.Extensions.Options;
 using System.Linq.Dynamic.Core;
+using System.Linq.Dynamic.Core.Parser;
 using System.Linq.Expressions;
-using System.Reflection.Emit;
 
 namespace DynamicContextConsoleClient
 {
@@ -30,8 +28,12 @@ namespace DynamicContextConsoleClient
         public int Type { get; set; }
     }
 
+
+
     internal class Program
     {
+
+
         //we must have the result types in advance
         //recursive CTEs are still not possible with LINQ
         //https://michaelceber.medium.com/implementing-a-recursive-projection-query-in-c-and-entity-framework-core-240945122be6
@@ -45,6 +47,30 @@ namespace DynamicContextConsoleClient
             options.UseSqlServer("server=.;database=FdbaDb;integrated security=True;Trust Server Certificate=True;");
             options.ReplaceService<IModelCacheKeyFactory, CustomModelCacheKeyFactory>();
             var db = new BookShopApiContext(options.Options);
+
+
+            ParameterExpression x = Expression.Parameter(typeof(int), "x");
+            ParameterExpression y = Expression.Parameter(typeof(int), "y");
+
+            var symbols = new[] { x, y };
+
+            Expression body = new ExpressionParser(symbols, "(x + y) * 2", symbols, new ParsingConfig()).Parse(typeof(int));
+
+            LambdaExpression e = Expression.Lambda(body, new ParameterExpression[] { x, y });
+
+
+            var c = e.Compile();
+            var result = c.DynamicInvoke(1, 2);
+
+            Console.WriteLine(result);
+
+
+            var sm = new SelectManySample(db);
+            sm.TargetLinqQuery();
+            sm.CreateQuery();
+
+
+
 
             var cc = new DynamicQueryClass();
             cc.CreateQuery(db);
@@ -69,19 +95,20 @@ namespace DynamicContextConsoleClient
             new Result
             {
                 Id = module.Id,
-                Name  = module.DisplayName,
-                Properties = module.BusinessObjects.SelectMany(bm=>bm.BusinessProperties).Count(),
+                Name = module.DisplayName,
+                Properties = module.BusinessObjects.SelectMany(bm => bm.BusinessProperties).Count(),
                 LastProperty = db.BusinessProperties
                 .Where(p => p.BusinessObject.BusinessModuleId == module.Id)
                 .OrderBy(c => c.OrderIndex).Select(c => c.DisplayName)
                 .FirstOrDefault(),
-                
+
                 AllProperties = db.BusinessProperties
                 .Where(p => p.BusinessObject.BusinessModuleId == module.Id && filteredProperties.Contains(p.Id))
-                .Select(c=>new BP() { 
-                    Id=c.Id,
-                    Name=c.DisplayName,
-                    Type=c.BusinessPropertyType.DataType
+                .Select(c => new BP()
+                {
+                    Id = c.Id,
+                    Name = c.DisplayName,
+                    Type = c.BusinessPropertyType.DataType
                 }).ToList()
             });
 
@@ -93,7 +120,7 @@ namespace DynamicContextConsoleClient
             var sql2 = q2.ToQueryString();
             var data = q2.ToList();
 
-            Console.WriteLine( "finish");
+            Console.WriteLine("finish");
         }
     }
 }
