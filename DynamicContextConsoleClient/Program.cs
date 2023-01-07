@@ -1,5 +1,4 @@
-﻿
-using DynamicContextConsoleClient.Models;
+﻿using DynamicContextConsoleClient.Models;
 using DynamicCRUD.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -49,27 +48,11 @@ namespace DynamicContextConsoleClient
             var db = new BookShopApiContext(options.Options);
 
 
-            ParameterExpression x = Expression.Parameter(typeof(int), "x");
-            ParameterExpression y = Expression.Parameter(typeof(int), "y");
-
-            var symbols = new[] { x, y };
-
-            Expression body = new ExpressionParser(symbols, "(x + y) * 2", symbols, new ParsingConfig()).Parse(typeof(int));
-
-            LambdaExpression e = Expression.Lambda(body, new ParameterExpression[] { x, y });
-
-
-            var c = e.Compile();
-            var result = c.DynamicInvoke(1, 2);
-
-            Console.WriteLine(result);
-
-
-            var sm = new SelectManySample(db);
-            sm.TargetLinqQuery();
+            var sm = new DynamicLinqJoinMethod(db);
+            //sm.TargetLinqQuery();
             sm.CreateQuery();
 
-
+            
 
 
             var cc = new DynamicQueryClass();

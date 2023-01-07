@@ -2,6 +2,7 @@ using DynamicCRUD.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Diagnostics;
+using WebApplication1.Entities;
 
 namespace WebApplication1.Controllers
 {
@@ -10,15 +11,18 @@ namespace WebApplication1.Controllers
     public class WeatherForecastController : ControllerBase
     {
         private DynamicDbContext context;
+        private readonly FdbaDbContext fdbaDbContext;
 
-        public WeatherForecastController(DynamicDbContext context)
+        public WeatherForecastController(DynamicDbContext context, FdbaDbContext fdbaDbContext)
         {
             this.context = context;
+            this.fdbaDbContext = fdbaDbContext;
         }
 
         [HttpGet]
         public object Get()
         {
+            context.TestSelectManyParse();
             var timer = Stopwatch.StartNew();
             var request = new RequestObject()
             {

@@ -5,6 +5,9 @@ using System.Linq;
 using DynamicCRUD.Metadata;
 using System.Threading.Tasks;
 using System.Linq.Dynamic.Core;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Linq.Expressions;
+using System.Linq.Dynamic.Core.Parser;
 
 namespace DynamicCRUD.Data
 {
@@ -26,6 +29,48 @@ namespace DynamicCRUD.Data
         public void SetContextVersion(string version) => _version = version;
 
         public string GetContextVersion() => _version;
+
+        public void TestJoin()
+        {
+            var personEntity = this._metaDataEntityList.First(c => c.TableName == "Person");
+            var employeye = this._metaDataEntityList.First(c => c.TableName == "Employee");
+            var employeePayHistory = this._metaDataEntityList.First(c => c.TableName == "EmployeePayHistory");
+
+            var personDbSet = (IQueryable<DynamicEntity>)this.GetType()
+                .GetMethod("Set", 1, Type.EmptyTypes)
+                .MakeGenericMethod(personEntity.EntityType).Invoke(this, null);
+
+            var employeyeDbSet = (IQueryable<DynamicEntity>)this.GetType()
+                .GetMethod("Set", 1, Type.EmptyTypes)
+                .MakeGenericMethod(employeye.EntityType).Invoke(this, null);
+
+            var employeyePayHistpryDbSet = (IQueryable<DynamicEntity>)this.GetType()
+                .GetMethod("Set", 1, Type.EmptyTypes)
+                .MakeGenericMethod(employeePayHistory.EntityType).Invoke(this, null);
+
+            var join = personDbSet.Join(employeyeDbSet, "fdba_PersonId", "fdba_EmployeeId", "inner");
+            var empHistory = join.Join(employeyePayHistpryDbSet, "fdba_EmployeeId", "BusinessEntityID", "inner")
+                .Select("Rate");
+
+            var expression = empHistory.Expression;
+            var type = empHistory.ElementType;
+            var sql = empHistory.ToQueryString();
+        }
+        public void TestSelectManyParse()
+        {
+            var personEntity = this._metaDataEntityList.First(c => c.TableName == "Person");
+
+            var personDbSet = (IQueryable<DynamicEntity>)this.GetType()
+               .GetMethod("Set", 1, Type.EmptyTypes)
+               .MakeGenericMethod(personEntity.EntityType).Invoke(this, null);
+
+            var personParam = Expression.Parameter(personEntity.EntityType, "p");
+            var parameters = new[] { personParam };
+            var expressionToParse = string.Format("{0}.Employee.Select(c=>c.EmployeePayHistories)",
+                                personParam.Name);
+
+            Expression body = new ExpressionParser(parameters, expressionToParse, null, null).Parse(null, false);
+        }
 
 
         public object GetData(RequestObject requestObject)
