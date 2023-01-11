@@ -1,11 +1,11 @@
-﻿using DataAccess.Entities;
+﻿using DataAccess.Entities.Metadata;
 
-namespace Model.Expressions.LeafNodes
+namespace DataAccess.Entities.Expressions.LeafNodes
 {
     public class BusinessObjectLeafNode : MetadataItemPathNode
     {
         public Guid TargetObjectId { get; set; }
         public virtual BusinessObject TargetObject { get; set; }
-        
+
     }
 }

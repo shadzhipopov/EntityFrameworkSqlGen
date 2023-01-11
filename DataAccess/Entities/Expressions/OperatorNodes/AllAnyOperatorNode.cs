@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using System.Runtime.Serialization;
 
-namespace Model.Expressions.OperatorNodes
+namespace DataAccess.Entities.Expressions.OperatorNodes
 {
     public class AllAnyOperatorNode : BooleanOperatorItemNode
     {

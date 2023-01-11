@@ -1,4 +1,5 @@
 ﻿using DataAccess.Entities;
+using DataAccess.Entities.Metadata;
 using DynamicCRUD.Data;
 using DynamicCRUD.Emit;
 using DynamicCRUD.Metadata;
@@ -144,8 +145,9 @@ namespace DynamicCRUD.Api
             if(metadataHolder.Entities==null || metadataHolder.Entities.Count==0)
             {
                 var metadataContext = context.RequestServices.GetService<FdbaDbContext>();
+                metadataContext.Database.EnsureCreated();
                
-                var metadata = metadataContext.Set<BusinessObject>().Select(businessObject => new MetadataEntity()
+                 var metadata = metadataContext.Set<BusinessObject>().Select(businessObject => new MetadataEntity()
                 {
                     Id = businessObject.Id,
                     SchemaName = businessObject.BusinessModule.PhysicalName,

@@ -1,5 +1,5 @@
-﻿using DataAccess.Entities;
-using Model.Expressions.OperatorNodes;
+﻿using DataAccess.Entities.Expressions.OperatorNodes;
+using DataAccess.Entities.Metadata;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Serialization;
 
-namespace Model.Expressions
+namespace DataAccess.Entities.Expressions
 {
     public abstract class ExpressionNode : BaseObject
     {
@@ -18,17 +18,17 @@ namespace Model.Expressions
         public int ExecutionOrder { get; set; }
         public Guid? ParentId { get; set; }
 
-        
-        public virtual ChildrenOperatorNode Parent { get; set; }       
 
-       
+        public virtual ChildrenOperatorNode Parent { get; set; }
+
+
         public string UserDefinedAlias { get; set; }
-              
+
 
         public Guid BusinessObjectExpressionId { get; set; }
 
         public virtual BusinessObjectExpression BusinessObjectExpression { get; set; }
-        
+
         public bool IsAddedBySystem { get; set; }
     }
 }

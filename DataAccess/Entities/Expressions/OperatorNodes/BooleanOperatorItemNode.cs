@@ -1,7 +1,7 @@
-﻿using Model.Enums;
-using Model.Expressions.LeafNodes;
+﻿using DataAccess.Entities.Expressions.LeafNodes;
+using Model.Enums;
 
-namespace Model.Expressions.OperatorNodes
+namespace DataAccess.Entities.Expressions.OperatorNodes
 {
     public abstract class BooleanOperatorItemNode : BooleanOperatorNode
     {

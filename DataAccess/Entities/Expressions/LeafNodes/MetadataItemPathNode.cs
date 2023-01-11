@@ -1,6 +1,6 @@
-﻿using DataAccess.Entities;
+﻿using DataAccess.Entities.Metadata;
 
-namespace Model.Expressions.LeafNodes
+namespace DataAccess.Entities.Expressions.LeafNodes
 {
     public abstract class MetadataItemPathNode : LeafNode
     {

@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
 
-namespace Model.Expressions.OperatorNodes
+namespace DataAccess.Entities.Expressions.OperatorNodes
 {
     [DataContract(IsReference = true)]
     public abstract class BooleanOperatorNode : ChildrenOperatorNode

@@ -1,4 +1,4 @@
-﻿namespace Model
+﻿namespace DataAccess.Entities
 {
     public partial class BaseObject
     {
@@ -6,7 +6,7 @@
 
         public BaseObject()
         {
-            this.Id = Guid.NewGuid();
+            Id = Guid.NewGuid();
         }
 
         public bool IsDeleted { get; set; }

@@ -1,16 +1,16 @@
-﻿using DataAccess.Entities;
+﻿using DataAccess.Entities.Metadata;
 
-namespace Model.Expressions.LeafNodes
+namespace DataAccess.Entities.Expressions.LeafNodes
 {
     public class BusinessPropertyLeafNode : MetadataItemPathNode
     {
         public BusinessPropertyLeafNode()
         {
-            this.PathToTarget = new List<MetadataItemPathRelation>();
+            PathToTarget = new List<MetadataItemPathRelation>();
         }
 
         public Guid? BusinessPropertyId { get; set; }
-        
+
         public virtual BusinessProperty BusinessProperty { get; set; }
     }
 }

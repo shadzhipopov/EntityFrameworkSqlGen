@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.Serialization;
 
-namespace Model.Expressions.OperatorNodes
+namespace DataAccess.Entities.Expressions.OperatorNodes
 {
     public class CastFunctionNode : FunctionWithParametersNode
     {

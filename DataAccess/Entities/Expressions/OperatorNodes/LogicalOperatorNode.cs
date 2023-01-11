@@ -2,10 +2,10 @@
 using Model.Enums;
 using System.Linq.Expressions;
 
-namespace Model.Expressions.OperatorNodes
+namespace DataAccess.Entities.Expressions.OperatorNodes
 {
     public class LogicalOperatorNode : ChildrenOperatorNode
     {
-        public LogicalOperator LogicalOperator { get; set; }                
+        public LogicalOperator LogicalOperator { get; set; }
     }
 }

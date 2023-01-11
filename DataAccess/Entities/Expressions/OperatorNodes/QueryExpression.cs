@@ -1,8 +1,8 @@
 ﻿using Model.Enums;
 using System.Runtime.Serialization;
-using DataAccess.Entities;
+using DataAccess.Entities.Metadata;
 
-namespace Model.Expressions.OperatorNodes
+namespace DataAccess.Entities.Expressions.OperatorNodes
 {
     [DataContract(IsReference = true)]
     public class QueryExpression : ChildrenOperatorNode//, IQuerySource

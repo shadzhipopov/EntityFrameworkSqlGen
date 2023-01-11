@@ -1,4 +1,4 @@
-﻿namespace Model.Expressions.OperatorNodes
+﻿namespace DataAccess.Entities.Expressions.OperatorNodes
 {
     public class SelectOperatorNode : ChildrenOperatorNode
     {

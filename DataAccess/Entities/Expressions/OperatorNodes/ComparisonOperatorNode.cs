@@ -1,9 +1,9 @@
 ﻿using Model.Enums;
 
-namespace Model.Expressions.OperatorNodes
+namespace DataAccess.Entities.Expressions.OperatorNodes
 {
     public class ComparisonOperatorNode : ChildrenOperatorNode
     {
-        public ComparisonOperator Operation { get; set; }            
+        public ComparisonOperator Operation { get; set; }
     }
 }

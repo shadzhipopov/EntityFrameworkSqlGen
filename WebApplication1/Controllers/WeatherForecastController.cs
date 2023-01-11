@@ -1,6 +1,7 @@
 using DataAccess.Entities;
 using DynamicCRUD.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
 namespace WebApplication1.Controllers
@@ -33,6 +34,7 @@ namespace WebApplication1.Controllers
 
             };
             context.Database.EnsureCreated();
+            context.Database.Migrate();
             var data = context.GetData(request);
 
             var time = timer.ElapsedMilliseconds;

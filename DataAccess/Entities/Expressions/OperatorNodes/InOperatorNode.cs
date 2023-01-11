@@ -1,6 +1,6 @@
 ﻿using Model.Enums;
 
-namespace Model.Expressions.OperatorNodes
+namespace DataAccess.Entities.Expressions.OperatorNodes
 {
     public class InOperatorNode : BooleanOperatorItemNode
     {
