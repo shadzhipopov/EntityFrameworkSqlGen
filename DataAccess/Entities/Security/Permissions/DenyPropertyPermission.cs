@@ -1,7 +1,6 @@
 ﻿using DataAccess.Entities.Metadata;
 using Model.Enums;
 
-
 namespace DataAccess.Entities.Security.Permissions
 {
     public class DenyPropertyPermission : Permission
