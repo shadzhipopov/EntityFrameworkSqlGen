@@ -1,9 +1,10 @@
+using DataAccess.Entities;
 using DynamicCRUD.Api;
 using DynamicCRUD.Data;
 using DynamicCRUD.Metadata;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using WebApplication1.Entities;
+
 
 namespace WebApplication1
 {

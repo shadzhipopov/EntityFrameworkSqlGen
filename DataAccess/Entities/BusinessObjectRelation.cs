@@ -41,7 +41,5 @@ namespace DataAccess.Entities
         public string FromRelationName { get; set; }
 
         public string ToRelationName { get; set; }
-
-        public DeleteBehavior? DeleteBehavior { get; set; }
     }
 }

@@ -8,6 +8,7 @@ using System.Linq.Dynamic.Core;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Linq.Expressions;
 using System.Linq.Dynamic.Core.Parser;
+using Model.Enums;
 
 namespace DynamicCRUD.Data
 {
@@ -66,7 +67,7 @@ namespace DynamicCRUD.Data
 
             var personParam = Expression.Parameter(personEntity.EntityType, "p");
             var parameters = new[] { personParam };
-            var expressionToParse = string.Format("{0}.Employee.Select(c=>c.EmployeePayHistories)",
+            var expressionToParse = string.Format("{0}.Employee.EmployeePayHistory",
                                 personParam.Name);
 
             Expression body = new ExpressionParser(parameters, expressionToParse, null, null).Parse(null, false);

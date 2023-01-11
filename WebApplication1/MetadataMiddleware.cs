@@ -1,16 +1,10 @@
-﻿using DynamicCRUD.Data;
+﻿using DataAccess.Entities;
+using DynamicCRUD.Data;
 using DynamicCRUD.Emit;
 using DynamicCRUD.Metadata;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Model.Enums;
 using System.Reflection.Emit;
-using System.Threading.Tasks;
-using WebApplication1;
-using WebApplication1.Entities;
 
 namespace DynamicCRUD.Api
 {
@@ -151,25 +145,25 @@ namespace DynamicCRUD.Api
             {
                 var metadataContext = context.RequestServices.GetService<FdbaDbContext>();
                
-                var metadata = metadataContext.BusinessObjects.Select(businessObject => new MetadataEntity()
+                var metadata = metadataContext.Set<BusinessObject>().Select(businessObject => new MetadataEntity()
                 {
                     Id = businessObject.Id,
                     SchemaName = businessObject.BusinessModule.PhysicalName,
                     TableName = businessObject.PhysicalName,
                     Name = businessObject.DisplayName,
                     
-                    Properties = businessObject.BusinessProperties.Select(property => new MetadataEntityProperty
+                    Properties = businessObject.Properties.Select(property => new MetadataEntityProperty
                     {
                         Name = property.DisplayName,
-                        DbType = property.BusinessPropertyType.DataType,
+                        DbType = (int)property.Type.DataType,
                         ColumnName = property.PhysicalName,
                         IsPrimaryKey 
                          = property.IsPrimaryKey,
                     }).ToList()
                 }).ToList();
 
-                var businessObjects = metadataContext.BusinessObjects.Include(c=>c.BusinessProperties).ToList();
-                var relations = metadataContext.BusinessObjectRelations
+                var businessObjects = metadataContext.Set<BusinessObject>().Include(c=>c.Properties).ToList();
+                var relations = metadataContext.Set<BusinessObjectRelation>()
                     .Include(c => c.ForeignKeys)
                     .ToList();
 

@@ -35,33 +35,6 @@ namespace DataAccess.Entities
         public DbSet<ExpressionNode> ExpressionNodes { get; set; }
         public DbSet<AggregateFunctionNode> AggregateFunctionNodes { get; set; }
 
-        //public virtual DbSet<BusinessModule> BusinessModules { get; set; }
-        //public virtual DbSet<BusinessObject> BusinessObjects { get; set; }
-        //public virtual DbSet<BusinessObjectExpression> BusinessObjectExpressions { get; set; }
-        //public virtual DbSet<BusinessObjectGroup> BusinessObjectGroups { get; set; }
-        //public virtual DbSet<BusinessObjectRelation> BusinessObjectRelations { get; set; }
-        //public virtual DbSet<BusinessProperty> BusinessProperties { get; set; }
-        //public virtual DbSet<BusinessPropertyType> BusinessPropertyTypes { get; set; }
-        //public virtual DbSet<Container> Containers { get; set; }
-        //public virtual DbSet<ContainerRole> ContainerRoles { get; set; }
-        //public virtual DbSet<DatabaseDataType> DatabaseDataTypes { get; set; }
-        //public virtual DbSet<DatabaseInfo> DatabaseInfos { get; set; }
-        //public virtual DbSet<EnumerationType> EnumerationTypes { get; set; }
-        //public virtual DbSet<EnumerationValue> EnumerationValues { get; set; }
-        //public virtual DbSet<ExpressionNode> ExpressionNodes { get; set; }
-        //public virtual DbSet<EnumerationValueLeafNode> EnumerationValueLeafNodes { get; set; }
-        //public virtual DbSet<ForeignKey> ForeignKeys { get; set; }
-        //public virtual DbSet<ImportPropertyInfo> ImportPropertyInfos { get; set; }
-        //public virtual DbSet<MappingProperty> MappingProperties { get; set; }
-        //public virtual DbSet<MetadataItemPathRelation> MetadataItemPathRelations { get; set; }
-        //public virtual DbSet<Page> Pages { get; set; }
-        //public virtual DbSet<Permission> Permissions { get; set; }
-        //public virtual DbSet<Role> Roles { get; set; }
-        //public virtual DbSet<RoleUser> RoleUsers { get; set; }
-        //public virtual DbSet<User> Users { get; set; }
-        //public virtual DbSet<UserUsersGroup> UserUsersGroups { get; set; }
-        //public virtual DbSet<UsersGroup> UsersGroups { get; set; }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             #region Metadata configurators

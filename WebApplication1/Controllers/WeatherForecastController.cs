@@ -1,8 +1,7 @@
+using DataAccess.Entities;
 using DynamicCRUD.Data;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System.Diagnostics;
-using WebApplication1.Entities;
 
 namespace WebApplication1.Controllers
 {
