@@ -1,11 +1,11 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
-using System.Runtime.Serialization;
+
 
 namespace DataAccess.Entities.Expressions.LeafNodes
 {
-    [DataContract(IsReference = true)]
+    
     public class ClrEnumerationLeafNode : LeafNode
     {
         [NotMapped]

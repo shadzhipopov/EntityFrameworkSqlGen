@@ -1,10 +1,10 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Runtime.Serialization;
+
 
 namespace DataAccess.Entities.Metadata
 {
-    [DataContract(IsReference = true)]
+    
     public class ImportPropertyInfo : BaseObject
     {
 

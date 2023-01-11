@@ -17,7 +17,7 @@ namespace DataAccess.Entities.UI
         public Guid? QueryId { get; set; }
 
 
-        public BusinessObjectExpression Query { get; set; }
+        public virtual BusinessObjectExpression Query { get; set; }
 
 
         public Guid? FilterId { get; set; }

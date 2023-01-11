@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Runtime.Serialization;
+
 
 namespace DataAccess.Entities.Metadata
 {
@@ -20,18 +20,9 @@ namespace DataAccess.Entities.Metadata
 
         public Guid? ManyToManyObjectId { get; set; }
 
-        public BusinessObject ManyToManyObject { get; set; }
-
-        public virtual ICollection<ForeignKey> ForeignKeys { get; set; }
-
-
         public Guid FromObjectId { get; set; }
 
         public Guid ToObjectId { get; set; }
-
-        public BusinessObject FromObject { get; set; }
-
-        public BusinessObject ToObject { get; set; }
 
         public RelationEnd FromEnd { get; set; }
 
@@ -40,5 +31,15 @@ namespace DataAccess.Entities.Metadata
         public string FromRelationName { get; set; }
 
         public string ToRelationName { get; set; }
+
+
+
+        public virtual BusinessObject ManyToManyObject { get; set; }
+
+        public virtual ICollection<ForeignKey> ForeignKeys { get; set; }
+
+        public virtual BusinessObject FromObject { get; set; }
+
+        public virtual BusinessObject ToObject { get; set; }
     }
 }

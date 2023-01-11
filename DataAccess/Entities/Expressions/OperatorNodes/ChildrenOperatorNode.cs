@@ -1,12 +1,10 @@
-﻿using System.Collections.ObjectModel;
-
-namespace DataAccess.Entities.Expressions.OperatorNodes
+﻿namespace DataAccess.Entities.Expressions.OperatorNodes
 {
     public abstract class ChildrenOperatorNode : ExpressionNode
     {
         public ChildrenOperatorNode()
         {
-            Children = new ObservableCollection<ExpressionNode>();
+            Children = new List<ExpressionNode>();
         }
 
         public virtual ICollection<ExpressionNode> Children { get; set; }

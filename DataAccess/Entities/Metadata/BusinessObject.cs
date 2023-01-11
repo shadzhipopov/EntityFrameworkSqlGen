@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Runtime.Serialization;
+
 using System.Collections.ObjectModel;
 using DataAccess.Entities.UI;
 
@@ -16,10 +16,6 @@ namespace DataAccess.Entities.Metadata
             Pages = new HashSet<Page>();
         }
 
-        public virtual ICollection<Page> Pages { get; set; }
-
-
-        public virtual ICollection<BusinessProperty> Properties { get; set; }
 
         public bool IsDeletedByUser { get; set; }
 
@@ -28,10 +24,6 @@ namespace DataAccess.Entities.Metadata
         public virtual BusinessObject BaseObject { get; set; }
 
         public Guid? NamePropertyId { get; set; }
-
-        public virtual BusinessProperty NameProperty { get; set; }
-
-        public virtual ICollection<BusinessObject> Descendants { get; set; }
 
         public bool IsHierarchicalType { get; set; }
 
@@ -57,11 +49,18 @@ namespace DataAccess.Entities.Metadata
 
         public virtual BusinessObjectGroup Group { get; set; }
 
+        public virtual BusinessProperty NameProperty { get; set; }
+
+        public virtual ICollection<BusinessObject> Descendants { get; set; }
 
         public virtual ICollection<BusinessObjectExpression> Expressions { get; set; }
 
         public virtual ICollection<BusinessObjectRelation> FromRelations { get; set; }
 
         public virtual ICollection<BusinessObjectRelation> ToRelations { get; set; }
+
+        public virtual ICollection<Page> Pages { get; set; }
+
+        public virtual ICollection<BusinessProperty> Properties { get; set; }
     }
 }

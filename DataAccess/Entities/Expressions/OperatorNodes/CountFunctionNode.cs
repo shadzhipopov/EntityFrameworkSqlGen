@@ -1,9 +1,9 @@
-﻿using System.Runtime.Serialization;
+﻿
 using DataAccess.Entities.Metadata;
 
 namespace DataAccess.Entities.Expressions.OperatorNodes
 {
-    [DataContract(IsReference = true)]
+    
     public class CountFunctionNode : AggregateFunctionNode
     {
         public Guid? CountPropertyId { get; set; }

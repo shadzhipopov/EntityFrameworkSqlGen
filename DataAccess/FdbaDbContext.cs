@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Model.Helpers;
 using DataAccess.Entities.Expressions.OperatorNodes;
 using DataAccess.Entities.Expressions;
-using DataAccess.Entities.Security.Permissions.Business;
 using DataAccess.Entities.Security;
 using DataAccess.Configurations.Expressions.LeafNodes;
 using DataAccess.Configurations.Metadata;
@@ -13,6 +12,7 @@ using DataAccess.Configurations.Security.Permissions;
 using DataAccess.Configurations.Expressions;
 using DataAccess.Entities.Metadata;
 using DataAccess.Configurators.UI;
+using DataAccess.Entities.Security.Permissions;
 #nullable disable
 
 namespace DataAccess.Entities

@@ -1,6 +1,6 @@
 ﻿using Model.Enums;
 
-namespace DataAccess.Entities.Security.Permissions.Business
+namespace DataAccess.Entities.Security.Permissions
 {
     public class DenyObjectAccessPermission : BusinessObjectPermission
     {

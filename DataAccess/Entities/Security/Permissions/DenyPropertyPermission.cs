@@ -1,15 +1,15 @@
 ﻿using DataAccess.Entities.Metadata;
 using Model.Enums;
-using System.Runtime.Serialization;
 
-namespace DataAccess.Entities.Security.Permissions.Business
+
+namespace DataAccess.Entities.Security.Permissions
 {
     public class DenyPropertyPermission : Permission
     {
         public Guid PropertyId { get; set; }
-
-        public BusinessProperty Property { get; set; }
-
+        
         public DenyMetadataItemAccess DenyPropertyAccess { get; set; }
+
+        public virtual BusinessProperty Property { get; set; }
     }
 }

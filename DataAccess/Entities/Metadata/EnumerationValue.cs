@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
-using System.Runtime.Serialization;
+
 
 namespace DataAccess.Entities.Metadata
 {
-    [DataContract(IsReference = true)]
+    
     public class EnumerationValue : BaseObject
     {
 

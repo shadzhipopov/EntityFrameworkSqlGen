@@ -1,10 +1,10 @@
 ﻿using Common;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
+
 
 namespace DataAccess.Entities.Metadata
 {
-    [DataContract(IsReference = true)]
+    
     public class DatabaseInfo : BaseObject
     {
 

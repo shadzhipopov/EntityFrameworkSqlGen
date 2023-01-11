@@ -51,7 +51,7 @@
 
         public Guid? ComputeExpressionId { get; set; }
 
-        public BusinessObjectExpression ComputeExpression { get; set; }
+        public virtual BusinessObjectExpression ComputeExpression { get; set; }
 
         public bool IsServiceProperty { get; set; }
 

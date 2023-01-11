@@ -1,9 +1,9 @@
 ﻿using Model.Enums;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Runtime.Serialization;
 
-namespace DataAccess.Entities.Security.Permissions.Business
+
+namespace DataAccess.Entities.Security.Permissions
 {
     public class WorkflowActionPermission : Permission
     {

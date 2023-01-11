@@ -1,6 +1,6 @@
 ﻿namespace DataAccess.Entities.Metadata
 {
-    public partial class DisplayNameObject : BaseObject
+    public abstract class DisplayNameObject : BaseObject
     {
         public string DisplayName { get; set; }
 

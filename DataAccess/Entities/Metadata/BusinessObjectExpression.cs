@@ -12,17 +12,11 @@ namespace DataAccess.Entities.Metadata
 
         public string Name { get; set; }
 
-        public bool? ApplyToAllPages { get; set; }
-
-        public virtual ICollection<ExpressionNode> Nodes { get; set; }
+        public bool? ApplyToAllPages { get; set; }        
 
         public bool IsShared { get; set; }
 
-
         public BusinessObjectExpressionType Type { get; set; }
-
-
-        public virtual BusinessObject BusinessObject { get; set; }
 
         public Guid BusinessObjectId { get; set; }
 
@@ -34,5 +28,9 @@ namespace DataAccess.Entities.Metadata
         public Guid? TargetPropertyId { get; set; }
 
         public virtual BusinessProperty TargetProperty { get; set; }
+
+        public virtual ICollection<ExpressionNode> Nodes { get; set; }
+
+        public virtual BusinessObject BusinessObject { get; set; }
     }
 }
