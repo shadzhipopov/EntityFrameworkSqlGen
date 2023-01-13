@@ -79,7 +79,8 @@ namespace DataAccess.Entities
             modelBuilder.ApplyConfiguration(new WhereOperatorNodeConfigurator());
             modelBuilder.ApplyConfiguration(new TrinaryOperatorNodeConfigurator());
             modelBuilder.ApplyConfiguration(new QueryExpressionConfigurator());
-
+            modelBuilder.ApplyConfiguration(new CountFunctionNodeConfigurator());
+            modelBuilder.ApplyConfiguration(new FunctionWithParametersNodeConfigurator());
             modelBuilder.ApplyConfiguration(new OrderByNodeConfigurator());
             modelBuilder.ApplyConfiguration(new OrderByNodeItemConfigurator());
             modelBuilder.ApplyConfiguration(new ExistsNodeConfigurator());

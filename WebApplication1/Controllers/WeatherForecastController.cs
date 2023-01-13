@@ -2,12 +2,15 @@ using DataAccess.Entities;
 using DynamicCRUD.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Storage;
 using System.Diagnostics;
 
 namespace WebApplication1.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("[controller]/[action]")]
     public class WeatherForecastController : ControllerBase
     {
         private DynamicDbContext context;
@@ -19,10 +22,29 @@ namespace WebApplication1.Controllers
             this.fdbaDbContext = fdbaDbContext;
         }
 
+        public object UpdateMetadata()
+        {
+            return "Metadata updated!";
+        }
+
+        [HttpGet]
+        public object GetPendingMigrations()
+        {
+            return context.Database.GetPendingMigrations();
+        }
+
+
+        [HttpGet]
+        public object UpdateDb()
+        {
+            this.context.Database.Migrate();
+            return "DB Updated";
+        }
+
         [HttpGet]
         public object Get()
         {
-            context.TestSelectManyParse();
+           // context.TestSelectManyParse();
             var timer = Stopwatch.StartNew();
             var request = new RequestObject()
             {
@@ -30,11 +52,15 @@ namespace WebApplication1.Controllers
                 
                 SelectType = SelectType.List,
                 SelectProperties = new List<string>()
-                { "FirstName", "Title", "LastName", "BusinessEntity.ModifiedDate"}
+                { "FirstName", "Title", "LastName", "Employee.JobTitle"}
 
             };
-            context.Database.EnsureCreated();
-            context.Database.Migrate();
+
+            var databaseCreator = context.GetService<IRelationalDatabaseCreator>();
+            var createScript = databaseCreator.GenerateCreateScript();
+            var migrator = context.GetInfrastructure().GetService<IMigrator>();
+            var pm = migrator.GenerateScript();
+            migrator.Migrate();
             var data = context.GetData(request);
 
             var time = timer.ElapsedMilliseconds;

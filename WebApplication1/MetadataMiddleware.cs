@@ -142,7 +142,12 @@ namespace DynamicCRUD.Api
             TContext dbContext)
         {
             bool shouldCreateTyes = false;
-            if(metadataHolder.Entities==null || metadataHolder.Entities.Count==0)
+            var contextVersion = dbContext.GetContextVersion();
+            if(metadataHolder.Version != contextVersion || (metadataHolder.Entities == null || metadataHolder.Entities.Count==0))
+            {
+                shouldCreateTyes = true;
+            }
+            if(shouldCreateTyes)
             {
                 var metadataContext = context.RequestServices.GetService<FdbaDbContext>();
                 metadataContext.Database.EnsureCreated();

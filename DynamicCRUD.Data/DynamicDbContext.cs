@@ -14,8 +14,6 @@ namespace DynamicCRUD.Data
 {
     public class DynamicDbContext : DbContext
     {
-
-
         string _version;
         public DynamicDbContext(DbContextOptions dbContextOptions) : base(dbContextOptions)
         {
