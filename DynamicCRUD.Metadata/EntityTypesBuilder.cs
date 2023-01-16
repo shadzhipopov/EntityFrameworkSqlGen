@@ -14,99 +14,23 @@ namespace DataAccess.DynamicContext
     public class EntityTypesBuilder
     {
         private readonly MetadataHolder metadataHolder;
-        private readonly FdbaDbContext metadataContext;
+        private readonly MetadataLoader loader;
 
-        public EntityTypesBuilder(MetadataHolder metadataHolder, FdbaDbContext context)
+        public EntityTypesBuilder(MetadataHolder metadataHolder, MetadataLoader loader)
         {
             this.metadataHolder = metadataHolder;
-            this.metadataContext = context;
+            this.loader = loader;
         }
 
-        public void CreateEntityTypes()
+        public void CreateEntityTypes(string version = null)
         {
             bool shouldCreateTyes = false;
             if (metadataHolder.Entities == null || metadataHolder.Entities.Count == 0)
             {
-                var metadata = metadataContext.Set<BusinessObjectEntity>()
-                    .Select(businessObject => new MetadataEntity()
-                    {
-                        Id = businessObject.Id,
-                        SchemaName = businessObject.BusinessModule.PhysicalName,
-                        TableName = businessObject.PhysicalName,
-                        Name = businessObject.DisplayName,
-
-                        Properties = businessObject.Properties.Select(property => new MetadataEntityProperty
-                        {
-                            Name = property.DisplayName,
-                            DbType = property.Type.DataType,
-                            ColumnName = property.PhysicalName,
-                            IsPrimaryKey
-                             = property.IsPrimaryKey,
-                        }).ToList()
-                    }).ToList();
-
-                var relations = metadataContext.Set<BusinessObjectRelationEntity>()                    
-                    .Include(c => c.ForeignKeys)
-                    .ThenInclude(c => c.ForeignKeyProperty)
-                    .ToList();
-
-                foreach (var relation in relations)
-                {
-                    var relationType = GetRelationType(relation);
-
-                    var fromEntity = metadata.First(c => c.Id == relation.FromObjectId);
-                    var toEntity = metadata.First(c => c.Id == relation.ToObjectId);
-
-                    switch (relationType)
-                    {
-                        case RelationType.ManyToMany:
-                            continue;
-                        case RelationType.OneToZeroOrOne:
-                            var fromEntityNavigation = new MetadataNavigationProperty();
-                            fromEntityNavigation.RelationId = relation.Id;
-                            fromEntityNavigation.RelationType = GetRelationType(relation);
-                            fromEntityNavigation.Type = relation.ToEnd;
-                            fromEntityNavigation.Name = toEntity.Name;
-                            fromEntityNavigation.RelationName = relation.RelationName;
-                            fromEntityNavigation.OppositeNavigationName = fromEntity.Name;
-                            fromEntityNavigation.OppositeObjectName = toEntity.Name;
-                            fromEntityNavigation.ForeignKeyPropertyName = GetForeignKeyPropertyName(relation);
-                            fromEntity.NavigationProperties.Add(fromEntityNavigation);
-
-                            var toEntityNavigation = new MetadataNavigationProperty();
-                            toEntityNavigation.RelationId = relation.Id;
-                            toEntityNavigation.RelationType = GetRelationType(relation);
-                            toEntityNavigation.Type = relation.FromEnd;
-                            toEntityNavigation.Name = fromEntity.Name;
-                            toEntityNavigation.RelationName = relation.RelationName;
-                            toEntityNavigation.OppositeNavigationName = toEntity.Name;
-                            toEntityNavigation.OppositeObjectName = fromEntity.Name;
-                            toEntityNavigation.ForeignKeyPropertyName = GetForeignKeyPropertyName(relation);
-                            toEntity.NavigationProperties.Add(toEntityNavigation);
-
-                            if (IsFromPrincipalCondition(relation))
-                            {
-                                fromEntityNavigation.IsPrincipal = true;
-                            }
-                            else
-                            {
-                                toEntityNavigation.IsPrincipal = false;
-                            }
-
-                            continue;
-                        case RelationType.OneToMany:
-                            CreateOneToManyNavigationProperties(relation, fromEntity, toEntity);
-                            break;
-                    }
-                }
-
-                foreach (var item in metadata.SelectMany(c => c.Properties))
-                {
-                    item.Type = item.DbType.MapToClrType().Name;
-                }
-
-                metadataHolder.Entities = metadata;
+                var entities = loader.Load();
+                metadataHolder.Entities = entities;
                 shouldCreateTyes = true;
+                metadataHolder.Version = version??"1.0";
             }
 
             if (shouldCreateTyes)
@@ -169,8 +93,6 @@ namespace DataAccess.DynamicContext
                     }
                 }
 
-                metadataHolder.Version = metadataHolder.Version;
-
                 foreach (var metadataEntity in metadataHolder.Entities)
                 {
                     var existEntityTypeBuilder = entityTypeBuilderList.FirstOrDefault(p => p.Key == metadataEntity.Name).Value;
@@ -199,89 +121,6 @@ namespace DataAccess.DynamicContext
             }
         }
 
-        private string PluralizeName(string name)
-        {
-            return PluralizeService.Core.PluralizationProvider.Pluralize(name);
-        }
-
-        private RelationType GetRelationType(BusinessObjectRelationEntity relation)
-        {
-            if (relation.FromEnd == RelationEnd.One || relation.FromEnd == RelationEnd.ZeroOrOne)
-            {
-                if (relation.ToEnd == RelationEnd.One || relation.ToEnd == RelationEnd.ZeroOrOne)
-                {
-                    return RelationType.OneToZeroOrOne;
-                }
-                else
-                {
-                    return RelationType.OneToMany;
-                }
-            }
-            else
-            {
-                if (relation.ToEnd == RelationEnd.Many)
-                {
-                    return RelationType.ManyToMany;
-                }
-                else
-                {
-                    return RelationType.OneToMany;
-                }
-            }
-        }
-
-        private string GetForeignKeyPropertyName(BusinessObjectRelationEntity relation)
-        {
-            return relation.ForeignKeys.SingleOrDefault().ForeignKeyProperty.PhysicalName;
-        }
-
-        private void CreateOneToManyNavigationProperties(BusinessObjectRelationEntity relation, MetadataEntity fromEntity, MetadataEntity toEntity)
-        {
-
-            var fromEntityNavigation = new MetadataNavigationProperty();
-            fromEntityNavigation.RelationType = GetRelationType(relation);
-            fromEntityNavigation.RelationId = relation.Id;
-            fromEntityNavigation.Type = relation.ToEnd;
-            fromEntityNavigation.Name = toEntity.Name;
-            fromEntityNavigation.RelationName = relation.RelationName;
-            fromEntityNavigation.OppositeNavigationName = fromEntity.Name;
-            fromEntityNavigation.OppositeObjectName = toEntity.Name;
-            fromEntityNavigation.ForeignKeyPropertyName = GetForeignKeyPropertyName(relation);
-            fromEntity.NavigationProperties.Add(fromEntityNavigation);
-
-            var toEntityNavigation = new MetadataNavigationProperty();
-            toEntityNavigation.RelationType = GetRelationType(relation);
-            toEntityNavigation.RelationId = relation.Id;
-            toEntityNavigation.Type = relation.FromEnd;
-            toEntityNavigation.Name = fromEntity.Name;
-            toEntityNavigation.RelationName = relation.RelationName;
-            toEntityNavigation.OppositeNavigationName = toEntity.Name;
-            toEntityNavigation.OppositeObjectName = fromEntity.Name;
-            toEntityNavigation.ForeignKeyPropertyName = GetForeignKeyPropertyName(relation);
-            toEntity.NavigationProperties.Add(toEntityNavigation);
-
-            if (relation.FromEnd == RelationEnd.One ||
-                relation.FromEnd == RelationEnd.ZeroOrOne)
-            {
-
-                toEntityNavigation.Name = PluralizeName(fromEntity.Name);
-            }
-            else
-            {
-
-                fromEntityNavigation.Name = PluralizeName(toEntity.Name);
-            }
-        }
-
-        private bool IsFromPrincipalCondition(BusinessObjectRelationEntity relation)
-        {
-            if (relation.FromEnd == RelationEnd.Many && relation.ToEnd == RelationEnd.Many)
-            {
-                throw new Exception("Many to many relations do not have principal!");
-            }
-            var condition = (relation.FromEnd == RelationEnd.One) ||
-                     (relation.FromEnd == RelationEnd.ZeroOrOne && relation.ToEnd == RelationEnd.Many);
-            return condition;
-        }
+        
     }
 }

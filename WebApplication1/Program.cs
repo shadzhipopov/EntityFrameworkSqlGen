@@ -29,6 +29,7 @@ namespace WebApplication1
                 options.ReplaceService<IModelCacheKeyFactory, DynamicContextCacheKeyFactory>();
             });
             builder.Services.AddSingleton<MetadataHolder>();
+            builder.Services.AddTransient<MetadataLoader>();
 
             builder.Services.AddControllers();
 

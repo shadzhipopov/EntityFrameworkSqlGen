@@ -16,9 +16,14 @@ namespace DataAccess.DynamicContext
 
         public object Create(DbContext context, bool designTime)
         {
-            return context is DynamicDbContext dynamicContext
-            ? (context.GetType(), dynamicContext.Version, designTime)
-            : (object)context.GetType();
+            if(context is DynamicDbContext dynamicContext)
+            {
+                return (context.GetType(), dynamicContext.Version, designTime);
+            }
+            else
+            {
+                return (context.GetType());
+            }
         }
     }
 }

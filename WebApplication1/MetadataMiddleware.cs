@@ -15,7 +15,7 @@ namespace DynamicCRUD.Api
 
         public async Task Invoke(
             HttpContext context,
-            FdbaDbContext fdbaDbContext,
+            MetadataLoader loader,
             MetadataHolder metadataHolder,
             TContext dbContext)
         {   
@@ -27,7 +27,7 @@ namespace DynamicCRUD.Api
             }
             if (shouldCreateTyes)
             {
-                EntityTypesBuilder typesBuilder = new EntityTypesBuilder(metadataHolder, fdbaDbContext);
+                EntityTypesBuilder typesBuilder = new EntityTypesBuilder(metadataHolder, loader);
                 typesBuilder.CreateEntityTypes();
             }
 

@@ -1,9 +1,11 @@
 using DataAccess.DynamicContext;
 using DataAccess.EntityFramework;
 using DynamicCRUD.Data;
+using DynamicCRUD.Metadata;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Diagnostics;
@@ -49,19 +51,14 @@ namespace WebApplication1.Controllers
             var timer = Stopwatch.StartNew();
             var request = new RequestObject()
             {
-                TableName = "Person",
+                TableName = "Employee",
                 
                 SelectType = SelectType.List,
                 SelectProperties = new List<string>()
-                { "FirstName", "Title", "LastName"}
+                { "JobTitle", "HireDate"}
 
             };
-
-            var databaseCreator = context.GetService<IRelationalDatabaseCreator>();
-            var createScript = databaseCreator.GenerateCreateScript();
-            var migrator = context.GetInfrastructure().GetService<IMigrator>();
-            var pm = migrator.GenerateScript();
-            migrator.Migrate();
+            CompareMetadata();
             var data = context.GetData(request);
 
             var time = timer.ElapsedMilliseconds;
@@ -70,6 +67,25 @@ namespace WebApplication1.Controllers
             var sqTime = timer.ElapsedMilliseconds;
 
             return data;
+        }
+
+        private void CompareMetadata()
+        {
+            var loader = this.HttpContext.RequestServices.GetService<MetadataLoader>();
+
+            var newHolder = new MetadataHolder() { Version = "1.1" };
+            var builder = new EntityTypesBuilder(newHolder, loader);
+            builder.CreateEntityTypes();
+            
+            var options = this.HttpContext.RequestServices.GetService<DbContextOptions>();
+            var dynamicContext = new DynamicDbContext(options, newHolder);
+
+            var modelComparer = context.GetService<IMigrationsModelDiffer>();
+
+            var prevModel = this.context.GetService<IDesignTimeModel>().Model.GetRelationalModel();
+            var actialModel = dynamicContext.GetService<IDesignTimeModel>().Model.GetRelationalModel();
+            var actualDiff = modelComparer.GetDifferences(prevModel,actialModel);
+
         }
     }
 }
