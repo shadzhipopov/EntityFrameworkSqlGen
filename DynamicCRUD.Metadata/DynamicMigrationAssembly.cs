@@ -18,6 +18,7 @@ namespace DynamicCRUD.Metadata
             IMigrationsIdGenerator idGenerator, 
             IDiagnosticsLogger<DbLoggerCategory.Migrations> logger) : base(currentContext, options, idGenerator, logger)
         {
+
         }
     }
 }

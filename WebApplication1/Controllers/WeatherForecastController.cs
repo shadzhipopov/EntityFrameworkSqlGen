@@ -84,6 +84,8 @@ namespace WebApplication1.Controllers
 
             var prevModel = this.context.GetService<IDesignTimeModel>().Model.GetRelationalModel();
             var actialModel = dynamicContext.GetService<IDesignTimeModel>().Model.GetRelationalModel();
+
+
             var actualDiff = modelComparer.GetDifferences(prevModel,actialModel);
 
         }
