@@ -1,4 +1,4 @@
-﻿namespace DataAccess.Entities
+﻿namespace DataAccess.EntityFramework.Entities
 {
     public partial class BaseObject
     {

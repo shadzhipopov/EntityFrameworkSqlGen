@@ -1,11 +1,11 @@
-﻿using DataAccess.Entities.Metadata;
+﻿using DataAccess.EntityFramework.Entities.Metadata;
 
-namespace DataAccess.Entities.Security.Permissions
+namespace DataAccess.EntityFramework.Entities.Security.Permissions
 {
     public abstract class BusinessModulePermission : Permission
     {
         public Guid ModuleId { get; set; }
 
-        public virtual BusinessModule Module { get; set; }
+        public virtual BusinessModuleEntity Module { get; set; }
     }
 }

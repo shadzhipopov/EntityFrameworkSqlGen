@@ -1,4 +1,5 @@
-using DataAccess.Entities;
+using DataAccess.DynamicContext;
+using DataAccess.EntityFramework;
 using DynamicCRUD.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -52,7 +53,7 @@ namespace WebApplication1.Controllers
                 
                 SelectType = SelectType.List,
                 SelectProperties = new List<string>()
-                { "FirstName", "Title", "LastName", "Employee.JobTitle"}
+                { "FirstName", "Title", "LastName"}
 
             };
 

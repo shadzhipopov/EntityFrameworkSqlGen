@@ -1,6 +1,7 @@
-﻿using DataAccess.Entities.Metadata;
+﻿using DataAccess.EntityFramework.Entities;
+using DataAccess.EntityFramework.Entities.Metadata;
 
-namespace DataAccess.Entities.UI
+namespace DataAccess.EntityFramework.Entities.UI
 {
     public class Page : BaseObject
     {
@@ -11,19 +12,19 @@ namespace DataAccess.Entities.UI
         public Guid PageObjectId { get; set; }
 
 
-        public BusinessObject PageObject { get; set; }
+        public BusinessObjectEntity PageObject { get; set; }
 
 
         public Guid? QueryId { get; set; }
 
 
-        public virtual BusinessObjectExpression Query { get; set; }
+        public virtual BusinessObjectExpressionEntity Query { get; set; }
 
 
         public Guid? FilterId { get; set; }
 
 
-        public virtual BusinessObjectExpression Filter { get; set; }
+        public virtual BusinessObjectExpressionEntity Filter { get; set; }
 
         //public virtual ICollection<Workflow> Actions { get; set; }
     }

@@ -1,10 +1,9 @@
-using DataAccess.Entities;
+using DataAccess.DynamicContext;
+using DataAccess.EntityFramework;
 using DynamicCRUD.Api;
-using DynamicCRUD.Data;
 using DynamicCRUD.Metadata;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace WebApplication1
 {
@@ -27,7 +26,7 @@ namespace WebApplication1
             {
                 options.UseSqlServer("Data Source=.; Initial Catalog=FdbaDb_New;Integrated Security=true; Trust Server Certificate=True");
                // options.UseNpgsql("server=localhost;user id=postgres;password=1234;database=BookShopApi;");
-                options.ReplaceService<IModelCacheKeyFactory, CustomModelCacheKeyFactory>();
+                options.ReplaceService<IModelCacheKeyFactory, DynamicContextCacheKeyFactory>();
             });
             builder.Services.AddSingleton<MetadataHolder>();
 

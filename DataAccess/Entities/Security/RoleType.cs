@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DataAccess.Entities.Security
+namespace DataAccess.EntityFramework.Entities.Security
 {
     public enum RoleType
     {

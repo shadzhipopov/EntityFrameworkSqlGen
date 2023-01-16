@@ -9,6 +9,7 @@ namespace DynamicCRUD.Metadata
 {
     public class MetadataNavigationProperty
     {
+        public Guid RelationId { get; set; }
         public string RelationName { get; set; }
         public string Name { get; set; }
         public string OppositeObjectName { get; set; }

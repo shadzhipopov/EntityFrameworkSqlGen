@@ -1,11 +1,13 @@
-﻿namespace DataAccess.Entities.Security
+﻿using DataAccess.EntityFramework.Entities;
+
+namespace DataAccess.EntityFramework.Entities.Security
 {
     public class Container : BaseObject
     {
         public Container()
         {
-            this.Users= new List<User>();
-            this.Roles= new List<Role>();
+            Users = new List<User>();
+            Roles = new List<Role>();
         }
 
         public string Name { get; set; }

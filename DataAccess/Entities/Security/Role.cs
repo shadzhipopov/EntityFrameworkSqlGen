@@ -1,6 +1,7 @@
-﻿using DataAccess.Entities.Security.Permissions;
+﻿using DataAccess.EntityFramework.Entities;
+using DataAccess.EntityFramework.Entities.Security.Permissions;
 
-namespace DataAccess.Entities.Security
+namespace DataAccess.EntityFramework.Entities.Security
 {
     public class Role : BaseObject
     {

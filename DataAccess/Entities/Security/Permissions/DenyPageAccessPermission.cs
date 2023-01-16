@@ -1,13 +1,12 @@
 ﻿using System;
+using DataAccess.EntityFramework.Entities.UI;
 
-using DataAccess.Entities.UI;
-
-namespace DataAccess.Entities.Security.Permissions
-{    
+namespace DataAccess.EntityFramework.Entities.Security.Permissions
+{
     public class DenyPageAccessPermission : Permission
-    {        
+    {
         public Guid PageId { get; set; }
-        
+
         public virtual Page Page { get; set; }
     }
 }

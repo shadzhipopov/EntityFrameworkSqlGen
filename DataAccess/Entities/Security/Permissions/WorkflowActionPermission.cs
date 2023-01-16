@@ -3,7 +3,7 @@ using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
 
-namespace DataAccess.Entities.Security.Permissions
+namespace DataAccess.EntityFramework.Entities.Security.Permissions
 {
     public class WorkflowActionPermission : Permission
     {
