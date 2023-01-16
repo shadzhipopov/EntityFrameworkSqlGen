@@ -27,7 +27,7 @@ namespace DynamicCRUD.Api
             }
             if (shouldCreateTyes)
             {
-                EntityTypesBuilder typesBuilder = new EntityTypesBuilder(metadataHolder, fdbaDbContext, true);
+                EntityTypesBuilder typesBuilder = new EntityTypesBuilder(metadataHolder, fdbaDbContext);
                 typesBuilder.CreateEntityTypes();
             }
 
