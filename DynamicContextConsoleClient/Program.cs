@@ -3,6 +3,7 @@ using DynamicContextConsoleClient.Models;
 using DynamicCRUD.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using System.Linq.Dynamic.Core;
 using System.Linq.Dynamic.Core.Parser;
 using System.Linq.Expressions;
@@ -47,6 +48,8 @@ namespace DynamicContextConsoleClient
             options.UseSqlServer("server=.;database=FdbaDb;integrated security=True;Trust Server Certificate=True;");
             options.ReplaceService<IModelCacheKeyFactory, DynamicContextCacheKeyFactory>();
             var db = new BookShopApiContext(options.Options);
+
+            var cmm = new CompareModelMigrator(db);
 
 
             var sm = new DynamicLinqJoinMethod(db);

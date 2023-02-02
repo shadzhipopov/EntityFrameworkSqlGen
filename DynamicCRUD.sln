@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication1", "WebAppli
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccess", "DataAccess\DataAccess.csproj", "{324639C0-B9A5-42B9-A506-E387E4BC183C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicMigrations", "DynamicMigrations\DynamicMigrations.csproj", "{CEA72623-979B-4FD3-8B1D-7C18248A2CFB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{324639C0-B9A5-42B9-A506-E387E4BC183C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{324639C0-B9A5-42B9-A506-E387E4BC183C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{324639C0-B9A5-42B9-A506-E387E4BC183C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEA72623-979B-4FD3-8B1D-7C18248A2CFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEA72623-979B-4FD3-8B1D-7C18248A2CFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEA72623-979B-4FD3-8B1D-7C18248A2CFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEA72623-979B-4FD3-8B1D-7C18248A2CFB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
