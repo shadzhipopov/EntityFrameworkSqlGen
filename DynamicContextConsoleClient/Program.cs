@@ -50,6 +50,7 @@ namespace DynamicContextConsoleClient
             var db = new BookShopApiContext(options.Options);
 
             var cmm = new CompareModelMigrator(db);
+            cmm.AddTableTest();
 
 
             var sm = new DynamicLinqJoinMethod(db);

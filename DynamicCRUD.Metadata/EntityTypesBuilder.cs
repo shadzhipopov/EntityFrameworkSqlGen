@@ -24,14 +24,14 @@ namespace DataAccess.DynamicContext
 
         public void CreateEntityTypes(string version = null)
         {
-            bool shouldCreateTyes = false;
-            if (metadataHolder.Entities == null || metadataHolder.Entities.Count == 0)
-            {
-                var entities = loader.Load();
-                metadataHolder.Entities = entities;
-                shouldCreateTyes = true;
-                metadataHolder.Version = version??"1.0";
-            }
+            bool shouldCreateTyes = true;
+            //if (metadataHolder.Entities == null || metadataHolder.Entities.Count == 0)
+            //{
+            //    var entities = loader.Load();
+            //    metadataHolder.Entities = entities;
+            //    shouldCreateTyes = true;
+            //    metadataHolder.Version = version??"1.0";
+            //}
 
             if (shouldCreateTyes)
             {
