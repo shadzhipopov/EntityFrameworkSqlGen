@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -70,7 +71,10 @@ namespace DynamicContextConsoleClient
                  model1, model2
                 );
 
-            var sql = db.GetService<IMigrationsSqlGenerator>().Generate(diff);
+            var commands = db.GetService<IMigrationsSqlGenerator>().Generate(diff);
+            var conn = db.GetService<IRelationalConnection>();
+            db.GetService<IMigrationCommandExecutor>().ExecuteNonQuery(commands, conn);
+
         }
 
         public void RemovedTableTest()

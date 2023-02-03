@@ -57,9 +57,6 @@ namespace DynamicContextConsoleClient
             //sm.TargetLinqQuery();
             sm.CreateQuery();
 
-            
-
-
             var cc = new DynamicQueryClass();
             cc.CreateQuery(db);
 
